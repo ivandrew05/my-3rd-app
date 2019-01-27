@@ -44,13 +44,19 @@ submenu.add_command(label="关于", command=关于)
 statusbar=ttk.Label(root, text="欢迎来到音乐播放器", relief=SUNKEN, anchor=W)
 statusbar.pack(side=BOTTOM, fill=X)
 
-#创建左右两个主frames, 左边的frame包含playlistbox和+添加-删除按钮，
-#右边的frame包含三个子frames, topframe包含文件名标签，总时长标签和当前播放时间标签，
+#创建左右两个主frames, 左边的主frame包含两个子frames，
+#ltopframe包含playlistbox和scrollbar, lbottomframe包含+添加-删除按钮，
+#右边的主frame包含三个子frames, topframe包含文件名标签，总时长标签和当前播放时间标签，
 #middleframe包含4个主要的按钮，bottomframe包含单曲循环按钮，消音按钮和音量条。
 leftframe=ttk.Frame(root)
 leftframe.pack(side=LEFT, padx=30)
 rightframe=ttk.Frame(root)
 rightframe.pack()
+
+ltopframe=ttk.Frame(leftframe)
+ltopframe.pack()
+lbottomframe=ttk.Frame(leftframe)
+lbottomframe.pack(side=LEFT)
 
 topframe=ttk.Frame(rightframe)
 topframe.pack()
@@ -59,9 +65,17 @@ middleframe.pack(padx=10, pady=10)
 bottomframe=ttk.Frame(rightframe)
 bottomframe.pack(padx=10, pady=10)
 
+#创建scrollbar
+scrollbar=ttk.Scrollbar(ltopframe, orient=VERTICAL)
+scrollbar.pack(side=RIGHT, fill=Y)
+
 #创建playlistbox和playlist
-playlistbox=Listbox(leftframe, width=24)    #change listbox width to 24 characters
+#change listbox width to 24 characters
+#给playlistbox添加scrollbar
+playlistbox=Listbox(ltopframe, width=24, yscrollcommand=scrollbar.set)
 playlistbox.pack()
+playlistbox.config(activestyle=DOTBOX)    #选中playlistbox的item时，四周有点框
+scrollbar.config(command=playlistbox.yview)
 
 playlist=[]
 #playlist contains the full path and the filename
@@ -84,11 +98,11 @@ def delete_song():
     playlist.pop(selected_song)
     
 #创建+添加-删除按钮
-button1=ttk.Button(leftframe, text="+ 添加", command=browse_file)
-button1.pack(side=LEFT)
+addbutton=ttk.Button(lbottomframe, text="+ 添加", command=browse_file)
+addbutton.pack(side=LEFT)
 
-button2=ttk.Button(leftframe, text="- 删除", command=delete_song)
-button2.pack(side=LEFT)
+delbutton=ttk.Button(lbottomframe, text="- 删除", command=delete_song)
+delbutton.pack(side=LEFT)
 
 #创建文件名标签，总时长标签和当前播放时间标签
 filelabel=ttk.Label(topframe, text="Let's Make Some Noise!")
@@ -204,6 +218,9 @@ def play_previous():
         show_details(playlist[selectedsong_index])
     playpausebutton.configure(image=pausephoto)
     repeatbutton.configure(image=repeatphoto)
+    playlistbox.selection_clear(0, END)    #清空playlistbox的选择
+    playlistbox.selection_set(selectedsong_index)    #设置playlistbox的选择
+    playlistbox.see(selectedsong_index)    #保证选择的item在playlistbox中可见
     playing=TRUE
     pause=FALSE
     repeat=FALSE
@@ -231,6 +248,9 @@ def play_next():
         selectedsong_index=0
     playpausebutton.configure(image=pausephoto)
     repeatbutton.configure(image=repeatphoto)
+    playlistbox.selection_clear(0, END)    #清空playlistbox的选择
+    playlistbox.selection_set(selectedsong_index)    #设置playlistbox的选择
+    playlistbox.see(selectedsong_index)    #保证选择的item在playlistbox中可见
     playing=TRUE
     pause=FALSE
     repeat=FALSE
@@ -294,7 +314,7 @@ def repeat_music():
         selected_song=playlistbox.curselection()
         selectedsong_index=int(selected_song[0])
         mixer.music.load(playlist[selectedsong_index])
-        mixer.music.play(-1)
+        mixer.music.play(-1)    #播放无限次
         statusbar["text"]="正在播放-"+os.path.basename(playlist[selectedsong_index])
         show_details(playlist[selectedsong_index])
         playpausebutton.configure(image=pausephoto)
@@ -304,7 +324,7 @@ def repeat_music():
         repeat=TRUE
         
 #定义function双击播放
-def double_click():
+def double_click(event):
     global selectedsong_index
     global playing
     global pause
@@ -401,8 +421,8 @@ scale.set(70)
 mixer.music.set_volume(0.7)
 scale.grid(row=0, column=2)
 
-#绑定双击playlistbox时，执行double_click()
-playlistbox.bind('<Double-1>', lambda x: double_click())
+#绑定双击playlistbox时，执行double_click
+playlistbox.bind('<Double-1>', double_click)
 
 #关闭时摧毁主窗口
 def on_closing():
