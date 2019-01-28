@@ -89,6 +89,9 @@ def add_to_playlist(filename):
     playlistbox.insert(index, filename)
     playlist.insert(index, filename_path)
     index=index+1
+    if playlist[0]=='':    #如果playlist中带有'', 移除它并删除playlistbox中对应的item
+        playlist.pop(0)
+        playlistbox.delete(0)
     
 #定义从播放列表删除歌曲
 def delete_song():
