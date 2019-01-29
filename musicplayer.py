@@ -32,13 +32,13 @@ submenu.add_command(label="打开", command=browse_file)
 submenu.add_command(label="退出", command=root.destroy)
 
 #定义function关于
-def 关于():
+def about():
     messagebox.showinfo(title="关于音乐播放器", message="这是一款使用Python tkinter编写的音乐播放器, by ivandrew05.")
 
 #创建子菜单下选项 
 submenu=Menu(menubar, tearoff=0)
 menubar.add_cascade(label="帮助", menu=submenu)
-submenu.add_command(label="关于", command=关于)
+submenu.add_command(label="关于", command=about)
 
 #创建左下角状态栏
 statusbar=ttk.Label(root, text="欢迎来到音乐播放器", relief=SUNKEN, anchor=W)
