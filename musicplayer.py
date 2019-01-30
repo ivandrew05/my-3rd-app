@@ -8,7 +8,7 @@ import time
 import threading
 from mutagen.mp3 import MP3
 from ttkthemes import themed_tk as tk
-import pygame
+#import pygame
 
 #创建主窗口并设置主题
 #root = Tk()
@@ -83,7 +83,7 @@ scrollbar.pack(side=RIGHT, fill=Y)
 #创建playlistbox和playlist
 #change listbox width to 24 characters
 #给playlistbox添加scrollbar
-playlistbox=Listbox(ltopframe, width=24, height=11, font='Arial', yscrollcommand=scrollbar.set)
+playlistbox=Listbox(ltopframe, width=24, height=10, font='Arial', yscrollcommand=scrollbar.set)
 playlistbox.pack()
 playlistbox.config(activestyle=DOTBOX)    #选中playlistbox的item时，四周有点框
 scrollbar.config(command=playlistbox.yview)
@@ -276,17 +276,17 @@ def stop_music():
     pause=FALSE
     repeat=FALSE
 
-pygame.init()
-music_ended=pygame.USEREVENT + 1
-mixer.music.set_endevent (music_ended) 
-running = True
+#pygame.init()
+#music_ended=pygame.USEREVENT + 1
+#mixer.music.set_endevent (music_ended) 
+#running = True
 
 #定义function重新播放音乐(并未使用)
-def replay_music():
-    while running:
-        for event in pygame.event.get():
-            if event.type == music_ended:
-                play_next()
+#def replay_music():
+    #while running:
+        #for event in pygame.event.get():
+            #if event.type == music_ended:
+                #play_next()
             
 #定义function单曲循环播放
 def repeat_music():
@@ -403,8 +403,8 @@ stopbutton=ttk.Button(middleframe, image=stopphoto, command=stop_music)
 stopbutton.grid(row=0, column=3, padx=10)
 
 #创建重新播放按钮(并未使用)
-replayphoto=PhotoImage(file="images/replay.png")
-replaybutton=ttk.Button(middleframe, image=replayphoto, command=replay_music)
+#replayphoto=PhotoImage(file="images/replay.png")
+#replaybutton=ttk.Button(middleframe, image=replayphoto, command=replay_music)
 #replaybutton.grid(row=0, column=4, padx=10)
 
 #创建单曲循环按钮
