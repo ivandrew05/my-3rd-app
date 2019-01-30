@@ -7,13 +7,24 @@ import os
 import time
 import threading
 from mutagen.mp3 import MP3
+from ttkthemes import themed_tk as tk
+import pygame
 
-#创建主窗口
-root = Tk()
+#创建主窗口并设置主题
+#root = Tk()
+root = tk.ThemedTk()
+root.get_themes()    # Returns a list of all themes that can be set
+root.set_theme("clearlooks")    # Sets an available theme
 root.title("音乐播放器")
 root.iconbitmap(r'images/icon.ico')
 root.resizable(False,False)
-mixer.init()    #initializing the mixer
+mixer.init()    # initializing the mixer
+
+#设置风格
+style=ttk.Style()
+style.configure('TButton', font=('Microsoft YaHei',11))
+style.configure('TLabel', font=('Microsoft YaHei',11))
+#style.configure('Listbox', background='#efebe7', font=('Microsoft YaHei',11))
 
 #创建主菜单
 menubar=Menu(root)
@@ -72,7 +83,7 @@ scrollbar.pack(side=RIGHT, fill=Y)
 #创建playlistbox和playlist
 #change listbox width to 24 characters
 #给playlistbox添加scrollbar
-playlistbox=Listbox(ltopframe, width=24, yscrollcommand=scrollbar.set)
+playlistbox=Listbox(ltopframe, width=24, height=11, font='Arial', yscrollcommand=scrollbar.set)
 playlistbox.pack()
 playlistbox.config(activestyle=DOTBOX)    #选中playlistbox的item时，四周有点框
 scrollbar.config(command=playlistbox.yview)
@@ -100,13 +111,6 @@ def delete_song():
     playlistbox.delete(selected_song)
     playlist.pop(selected_song)
     
-#创建+添加-删除按钮
-addbutton=ttk.Button(lbottomframe, text="+ 添加", command=browse_file)
-addbutton.pack(side=LEFT)
-
-delbutton=ttk.Button(lbottomframe, text="- 删除", command=delete_song)
-delbutton.pack(side=LEFT)
-
 #创建文件名标签，总时长标签和当前播放时间标签
 filelabel=ttk.Label(topframe, text="Let's Make Some Noise!")
 filelabel.pack(pady=10)
@@ -140,7 +144,7 @@ def show_details(play_song):
     t1=threading.Thread(target=start_count, args=(total_length,))
     t1.start()
 
-#定义function，计算当前播放时间
+#定义function计算当前播放时间
 def start_count(t):
     global pause
     current_time=0
@@ -162,6 +166,7 @@ pause=FALSE
 selectedsong_index=0
 repeat=FALSE
 mute=FALSE
+loopplaylist=TRUE
 
 #定义function播放暂停音乐
 def playpause_music():
@@ -271,26 +276,18 @@ def stop_music():
     pause=FALSE
     repeat=FALSE
 
+pygame.init()
+music_ended=pygame.USEREVENT + 1
+mixer.music.set_endevent (music_ended) 
+running = True
+
 #定义function重新播放音乐(并未使用)
 def replay_music():
-    global selectedsong_index
-    global playing
-    global pause
-    global repeat
-    stop_music()
-    time.sleep(0.1)
-    selected_song=playlistbox.curselection()
-    selectedsong_index=int(selected_song[0])
-    mixer.music.load(playlist[selectedsong_index])
-    mixer.music.play()
-    statusbar["text"]="正在播放-"+os.path.basename(playlist[selectedsong_index])
-    show_details(playlist[selectedsong_index])
-    playpausebutton.configure(image=pausephoto)
-    repeatbutton.configure(image=repeatphoto)
-    playing=TRUE
-    pause=FALSE
-    repeat=FALSE
-
+    while running:
+        for event in pygame.event.get():
+            if event.type == music_ended:
+                play_next()
+            
 #定义function单曲循环播放
 def repeat_music():
     global selectedsong_index
@@ -377,6 +374,12 @@ def mute_music():
         volumebutton.configure(image=volmutephoto)
         scale.set(0)
         mute=TRUE
+
+#创建+添加-删除按钮
+addbutton=ttk.Button(lbottomframe, text="+ 添加", width=5, command=browse_file)
+addbutton.pack(side=LEFT)
+delbutton=ttk.Button(lbottomframe, text="- 删除", width=5, command=delete_song)
+delbutton.pack(side=LEFT, padx=3)
 
 #创建播放/暂停按钮
 playphoto=PhotoImage(file="images/play.png")
