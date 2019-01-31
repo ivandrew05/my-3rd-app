@@ -18,13 +18,13 @@ root.set_theme("clearlooks")    # Sets an available theme
 root.title("音乐播放器")
 root.iconbitmap(r'images/icon.ico')
 root.resizable(False,False)
+root.configure(background='#efebe7')
 mixer.init()    # initializing the mixer
 
 #设置风格
 style=ttk.Style()
 style.configure('TButton', font=('Microsoft YaHei',11))
 style.configure('TLabel', font=('Microsoft YaHei',11))
-#style.configure('Listbox', background='#efebe7', font=('Microsoft YaHei',11))
 
 #创建主菜单
 menubar=Menu(root)
@@ -53,6 +53,7 @@ submenu.add_command(label="关于", command=about)
 
 #创建左下角状态栏
 statusbar=ttk.Label(root, text="欢迎来到音乐播放器", relief=SUNKEN, anchor=W)
+statusbar.config(font=('Microsoft YaHei',10))
 statusbar.pack(side=BOTTOM, fill=X)
 
 #创建左右两个主frames, 左边的主frame包含两个子frames，
@@ -83,9 +84,9 @@ scrollbar.pack(side=RIGHT, fill=Y)
 #创建playlistbox和playlist
 #change listbox width to 24 characters
 #给playlistbox添加scrollbar
-playlistbox=Listbox(ltopframe, width=24, height=10, font='Arial', yscrollcommand=scrollbar.set)
+playlistbox=Listbox(ltopframe, width=24, height=10, yscrollcommand=scrollbar.set)
 playlistbox.pack()
-playlistbox.config(activestyle=DOTBOX)    #选中playlistbox的item时，四周有点框
+playlistbox.config(activestyle=DOTBOX, font=('Microsoft YaHei',10))    #选中playlistbox的item时，四周有点框
 scrollbar.config(command=playlistbox.yview)
 
 playlist=[]
@@ -166,14 +167,13 @@ pause=FALSE
 selectedsong_index=0
 repeat=FALSE
 mute=FALSE
-loopplaylist=TRUE
 
 #定义function播放暂停音乐
 def playpause_music():
     global playing
     global selectedsong_index
     global repeat
-    repeatbutton.configure(image=repeatphoto)
+    repeatbutton.configure(image=repeatoffphoto)
     repeat=FALSE
     if playing: #if playing=TRUE
         global pause
@@ -225,7 +225,7 @@ def play_previous():
         statusbar["text"]="正在播放-"+os.path.basename(playlist[selectedsong_index])
         show_details(playlist[selectedsong_index])
     playpausebutton.configure(image=pausephoto)
-    repeatbutton.configure(image=repeatphoto)
+    repeatbutton.configure(image=repeatoffphoto)
     playlistbox.selection_clear(0, END)    #清空playlistbox的选择
     playlistbox.selection_set(selectedsong_index)    #设置playlistbox的选择
     playlistbox.see(selectedsong_index)    #保证选择的item在playlistbox中可见
@@ -255,7 +255,7 @@ def play_next():
         show_details(playlist[0])
         selectedsong_index=0
     playpausebutton.configure(image=pausephoto)
-    repeatbutton.configure(image=repeatphoto)
+    repeatbutton.configure(image=repeatoffphoto)
     playlistbox.selection_clear(0, END)    #清空playlistbox的选择
     playlistbox.selection_set(selectedsong_index)    #设置playlistbox的选择
     playlistbox.see(selectedsong_index)    #保证选择的item在playlistbox中可见
@@ -270,12 +270,12 @@ def stop_music():
     global repeat
     mixer.music.stop()
     playpausebutton.configure(image=playphoto)
-    repeatbutton.configure(image=repeatphoto)
+    repeatbutton.configure(image=repeatoffphoto)
     statusbar["text"]="已停止播放"
     playing=FALSE
     pause=FALSE
     repeat=FALSE
-
+    
 #pygame.init()
 #music_ended=pygame.USEREVENT + 1
 #mixer.music.set_endevent (music_ended) 
@@ -304,7 +304,7 @@ def repeat_music():
         statusbar["text"]="正在播放-"+os.path.basename(playlist[selectedsong_index])
         show_details(playlist[selectedsong_index])
         playpausebutton.configure(image=pausephoto)
-        repeatbutton.configure(image=repeatphoto)
+        repeatbutton.configure(image=repeatoffphoto)
         playing=TRUE
         pause=FALSE
         repeat=FALSE
@@ -338,7 +338,7 @@ def double_click(event):
     statusbar["text"]="正在播放-"+os.path.basename(playlist[selectedsong_index])
     show_details(playlist[selectedsong_index])
     playpausebutton.configure(image=pausephoto)
-    repeatbutton.configure(image=repeatphoto)
+    repeatbutton.configure(image=repeatoffphoto)
     playing=TRUE
     pause=FALSE
     repeat=FALSE
@@ -408,9 +408,9 @@ stopbutton.grid(row=0, column=3, padx=10)
 #replaybutton.grid(row=0, column=4, padx=10)
 
 #创建单曲循环按钮
-repeatphoto=PhotoImage(file="images/repeat.png")
+repeatoffphoto=PhotoImage(file="images/repeatoff.png")
 repeatonphoto=PhotoImage(file="images/repeaton.png")
-repeatbutton=ttk.Button(bottomframe, image=repeatphoto, command=repeat_music)
+repeatbutton=ttk.Button(bottomframe, image=repeatoffphoto, command=repeat_music)
 repeatbutton.grid(row=0, column=0, padx=10)
 
 #创建消音按钮和4个音量图标
@@ -423,6 +423,7 @@ volumebutton.grid(row=0, column=1)
 
 #创建音量条并设置默认音量
 scale=ttk.Scale(bottomframe, from_=0, to=100, orient=HORIZONTAL, command=set_vol)
+scale.config(length=130)    #设置scale的长度
 scale.set(70)
 mixer.music.set_volume(0.7)
 scale.grid(row=0, column=2)
