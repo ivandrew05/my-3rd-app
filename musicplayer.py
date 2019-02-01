@@ -14,7 +14,7 @@ from ttkthemes import themed_tk as tk
 #root = Tk()
 root = tk.ThemedTk()
 root.get_themes()    # Returns a list of all themes that can be set
-root.set_theme("clearlooks")    # Sets an available theme
+root.set_theme("clearlooks")    # Sets an available theme: "clearlooks", "radiance", "arc", "blue"
 root.title("音乐播放器")
 root.iconbitmap(r'images/icon.ico')
 root.resizable(False,False)
@@ -26,7 +26,7 @@ style=ttk.Style()
 style.configure('TButton', font=('Microsoft YaHei',11))
 style.configure('TLabel', font=('Microsoft YaHei',11))
 
-#创建主菜单
+#创建菜单栏
 menubar=Menu(root)
 root.config(menu=menubar)
 
@@ -36,20 +36,20 @@ def browse_file():
     filename_path=filedialog.askopenfilename()
     add_to_playlist(filename_path)
     
-#创建子菜单
+#创建菜单和菜单下items
 submenu=Menu(menubar, tearoff=0)
-menubar.add_cascade(label="文件", menu=submenu)
-submenu.add_command(label="打开", command=browse_file)
-submenu.add_command(label="退出", command=root.destroy)
+menubar.add_cascade(label="文件", font=('Microsoft YaHei',9), menu=submenu)
+submenu.add_command(label="打开", font=('Microsoft YaHei',9), command=browse_file)
+submenu.add_command(label="退出", font=('Microsoft YaHei',9), command=root.destroy)
 
 #定义function关于
 def about():
     messagebox.showinfo(title="关于音乐播放器", message="这是一款使用Python tkinter编写的音乐播放器, by ivandrew05.")
 
-#创建子菜单下选项 
+#创建菜单和菜单下item
 submenu=Menu(menubar, tearoff=0)
-menubar.add_cascade(label="帮助", menu=submenu)
-submenu.add_command(label="关于", command=about)
+menubar.add_cascade(label="帮助", font=('Microsoft YaHei',9), menu=submenu)
+submenu.add_command(label="关于", font=('Microsoft YaHei',9), command=about)
 
 #创建左下角状态栏
 statusbar=ttk.Label(root, text="欢迎来到音乐播放器", relief=SUNKEN, anchor=W)
@@ -386,6 +386,7 @@ playphoto=PhotoImage(file="images/play.png")
 pausephoto=PhotoImage(file="images/pause.png")
 playpausebutton=ttk.Button(middleframe, image=playphoto, command= playpause_music)
 playpausebutton.grid(row=0, column=1, padx=10)
+
 
 #创建上一首按钮
 playpreviousphoto=PhotoImage(file="images/playprevious.png")
