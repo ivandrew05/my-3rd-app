@@ -1,14 +1,15 @@
+import os
+import time
+import threading
+
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 from tkinter import filedialog
+
 from pygame import mixer
-import os
-import time
-import threading
 from mutagen.mp3 import MP3
 from ttkthemes import themed_tk as tk
-#import pygame
 
 #创建主窗口并设置主题
 #root = Tk()
@@ -162,32 +163,30 @@ def start_count(t):
             current_time=current_time+0.1
 
 #创建几个global variables
-playing=FALSE
-pause=FALSE
+playing=False
+pause=False
 selectedsong_index=0
-repeat=FALSE
-mute=FALSE
+loop=False
+mute=False
+running =False
 
 #定义function播放暂停音乐
 def playpause_music():
     global playing
     global selectedsong_index
-    global repeat
-    repeatbutton.configure(image=repeatoffphoto)
-    repeat=FALSE
-    if playing: #if playing=TRUE
+    if playing: #if playing=True
         global pause
-        if pause: #if pause=TRUE
+        if pause: #if pause=True
             mixer.music.unpause()
             playpausebutton.configure(image=pausephoto)
             statusbar["text"]="正在播放-"+os.path.basename(playlist[selectedsong_index])
-            pause=FALSE
-        else:  #if pause=FALSE
+            pause=False
+        else:  #if pause=False
             mixer.music.pause()
             playpausebutton.configure(image=playphoto)
             statusbar["text"]="已暂停播放-"+os.path.basename(playlist[selectedsong_index])
-            pause=TRUE
-    else:  #if playing=FALSE
+            pause=True
+    else:  #if playing=False
         try:
             stop_music()
             time.sleep(0.1)
@@ -199,46 +198,15 @@ def playpause_music():
             statusbar["text"]="正在播放-"+os.path.basename(play_it)
             show_details(play_it)
             playpausebutton.configure(image=pausephoto)
-            playing=TRUE
+            playing=True
         except:
             messagebox.showerror(title="无音乐文件", message='''请从左侧选择您想听的音乐，再点击播放。''')
 
-#定义function播放上一首
-def play_previous():
-    global selectedsong_index
-    global playing
-    global pause
-    global repeat
-    stop_music()
-    time.sleep(0.1)
-    a=len(playlist)-1
-    if selectedsong_index==0:
-        mixer.music.load(playlist[-1])
-        mixer.music.play()
-        statusbar["text"]="正在播放-"+os.path.basename(playlist[-1])
-        show_details(playlist[-1])
-        selectedsong_index=a
-    elif selectedsong_index<a or selectedsong_index==a:
-        selectedsong_index=selectedsong_index-1
-        mixer.music.load(playlist[selectedsong_index])
-        mixer.music.play()
-        statusbar["text"]="正在播放-"+os.path.basename(playlist[selectedsong_index])
-        show_details(playlist[selectedsong_index])
-    playpausebutton.configure(image=pausephoto)
-    repeatbutton.configure(image=repeatoffphoto)
-    playlistbox.selection_clear(0, END)    #清空playlistbox的选择
-    playlistbox.selection_set(selectedsong_index)    #设置playlistbox的选择
-    playlistbox.see(selectedsong_index)    #保证选择的item在playlistbox中可见
-    playing=TRUE
-    pause=FALSE
-    repeat=FALSE
-    
 #定义function播放下一首
 def play_next():
     global selectedsong_index
     global playing
     global pause
-    global repeat
     stop_music()
     time.sleep(0.1)
     a=len(playlist)-1
@@ -248,87 +216,92 @@ def play_next():
         mixer.music.play()
         statusbar["text"]="正在播放-"+os.path.basename(playlist[selectedsong_index])
         show_details(playlist[selectedsong_index])
-    elif selectedsong_index==a:
+    else:
         mixer.music.load(playlist[0])
         mixer.music.play()
         statusbar["text"]="正在播放-"+os.path.basename(playlist[0])
         show_details(playlist[0])
         selectedsong_index=0
     playpausebutton.configure(image=pausephoto)
-    repeatbutton.configure(image=repeatoffphoto)
     playlistbox.selection_clear(0, END)    #清空playlistbox的选择
     playlistbox.selection_set(selectedsong_index)    #设置playlistbox的选择
     playlistbox.see(selectedsong_index)    #保证选择的item在playlistbox中可见
-    playing=TRUE
-    pause=FALSE
-    repeat=FALSE
+    playing=True
+    pause=False
 
-#定义function停止播放音乐
-def stop_music():
-    global playing
-    global pause
-    global repeat
-    mixer.music.stop()
-    playpausebutton.configure(image=playphoto)
-    repeatbutton.configure(image=repeatoffphoto)
-    statusbar["text"]="已停止播放"
-    playing=FALSE
-    pause=FALSE
-    repeat=FALSE
-    
-#pygame.init()
-#music_ended=pygame.USEREVENT + 1
-#mixer.music.set_endevent (music_ended) 
-#running = True
-
-#定义function重新播放音乐(并未使用)
-#def replay_music():
-    #while running:
-        #for event in pygame.event.get():
-            #if event.type == music_ended:
-                #play_next()
-            
-#定义function单曲循环播放
-def repeat_music():
+#定义function播放上一首
+def play_previous():
     global selectedsong_index
     global playing
     global pause
-    global repeat
-    if repeat:    # if repeat=TRUE
-        stop_music()
-        time.sleep(0.1)
-        selected_song=playlistbox.curselection()
-        selectedsong_index=int(selected_song[0])
+    stop_music()
+    time.sleep(0.1)
+    a=len(playlist)-1
+    if selectedsong_index==0:
+        mixer.music.load(playlist[-1])
+        mixer.music.play()
+        statusbar["text"]="正在播放-"+os.path.basename(playlist[-1])
+        show_details(playlist[-1])
+        selectedsong_index=a
+    else:
+        selectedsong_index=selectedsong_index-1
         mixer.music.load(playlist[selectedsong_index])
         mixer.music.play()
         statusbar["text"]="正在播放-"+os.path.basename(playlist[selectedsong_index])
         show_details(playlist[selectedsong_index])
-        playpausebutton.configure(image=pausephoto)
-        repeatbutton.configure(image=repeatoffphoto)
-        playing=TRUE
-        pause=FALSE
-        repeat=FALSE
-    else:    # if repeat=FALSE
-        stop_music()
-        time.sleep(0.1)
-        selected_song=playlistbox.curselection()
-        selectedsong_index=int(selected_song[0])
-        mixer.music.load(playlist[selectedsong_index])
-        mixer.music.play(-1)    #播放无限次
-        statusbar["text"]="正在播放-"+os.path.basename(playlist[selectedsong_index])
-        show_details(playlist[selectedsong_index])
-        playpausebutton.configure(image=pausephoto)
-        repeatbutton.configure(image=repeatonphoto)
-        playing=TRUE
-        pause=FALSE
-        repeat=TRUE
-        
+    playpausebutton.configure(image=pausephoto)
+    playlistbox.selection_clear(0, END)    #清空playlistbox的选择
+    playlistbox.selection_set(selectedsong_index)    #设置playlistbox的选择
+    playlistbox.see(selectedsong_index)    #保证选择的item在playlistbox中可见
+    playing=True
+    pause=False
+    
+#定义function停止播放音乐
+def stop_music():
+    global playing
+    global pause
+    mixer.music.stop()
+    playpausebutton.configure(image=playphoto)
+    statusbar["text"]="已停止播放"
+    playing=False
+    pause=False
+
+#定义function循环播放列表
+def loop_playlist():
+    global running
+    global playing
+    global selectedsong_index
+    while running:
+        if mixer.music.get_busy() or playing==False:
+            time.sleep(1.0)
+        else:
+            play_next()
+            print(selectedsong_index)
+                     
+#定义function循环播放音乐
+def loop_music():
+    global loop
+    global running
+    if loop==False:
+        running=True
+        loopbutton.configure(image=looponphoto)
+        t2=threading.Thread(target=loop_playlist)
+        t2.start()
+        loop=True
+    else:    # if loop==True
+        running=False
+        loopbutton.configure(image=loopoffphoto)
+        loop=False
+        a=threading.enumerate()
+        print(a)
+        #threading.enumerate() returns a list of all Thread objects currently alive,
+        #It excludes terminated threads and threads that have not yet been started.
+                          
 #定义function双击播放
 def double_click(event):
     global selectedsong_index
     global playing
     global pause
-    global repeat
     stop_music()
     time.sleep(0.1)
     selected_song=playlistbox.curselection()
@@ -338,10 +311,8 @@ def double_click(event):
     statusbar["text"]="正在播放-"+os.path.basename(playlist[selectedsong_index])
     show_details(playlist[selectedsong_index])
     playpausebutton.configure(image=pausephoto)
-    repeatbutton.configure(image=repeatoffphoto)
-    playing=TRUE
-    pause=FALSE
-    repeat=FALSE
+    playing=True
+    pause=False
 
 #定义function设置音量
 def set_vol(val):
@@ -350,16 +321,16 @@ def set_vol(val):
     mixer.music.set_volume(volume)    #mixer set_volume only takes value from 0 to 1
     if volume==0:
         volumebutton.configure(image=volmutephoto)
-        mute=TRUE
+        mute=True
     elif 0<volume<0.33 or volume==0.33:
         volumebutton.configure(image=volminphoto)
-        mute=FALSE
+        mute=False
     elif 0.33<volume<0.66 or volume==0.66:
         volumebutton.configure(image=volmidphoto)
-        mute=FALSE
+        mute=False
     else: # if volume>0.66
         volumebutton.configure(image=volmaxphoto)
-        mute=FALSE
+        mute=False
         
 #定义消音  
 def mute_music():
@@ -368,12 +339,12 @@ def mute_music():
         mixer.music.set_volume(0.7)
         volumebutton.configure(image=volmidphoto)
         scale.set(70)
-        mute=FALSE
+        mute=False
     else:
         mixer.music.set_volume(0)
         volumebutton.configure(image=volmutephoto)
         scale.set(0)
-        mute=TRUE
+        mute=True
 
 #创建+添加-删除按钮
 addbutton=ttk.Button(lbottomframe, text="+ 添加", width=5, command=browse_file)
@@ -386,7 +357,6 @@ playphoto=PhotoImage(file="images/play.png")
 pausephoto=PhotoImage(file="images/pause.png")
 playpausebutton=ttk.Button(middleframe, image=playphoto, command= playpause_music)
 playpausebutton.grid(row=0, column=1, padx=10)
-
 
 #创建上一首按钮
 playpreviousphoto=PhotoImage(file="images/playprevious.png")
@@ -403,16 +373,11 @@ stopphoto=PhotoImage(file="images/stop.png")
 stopbutton=ttk.Button(middleframe, image=stopphoto, command=stop_music)
 stopbutton.grid(row=0, column=3, padx=10)
 
-#创建重新播放按钮(并未使用)
-#replayphoto=PhotoImage(file="images/replay.png")
-#replaybutton=ttk.Button(middleframe, image=replayphoto, command=replay_music)
-#replaybutton.grid(row=0, column=4, padx=10)
-
-#创建单曲循环按钮
-repeatoffphoto=PhotoImage(file="images/repeatoff.png")
-repeatonphoto=PhotoImage(file="images/repeaton.png")
-repeatbutton=ttk.Button(bottomframe, image=repeatoffphoto, command=repeat_music)
-repeatbutton.grid(row=0, column=0, padx=10)
+#创建列表循环按钮
+loopoffphoto=PhotoImage(file="images/loopoff.png")
+looponphoto=PhotoImage(file="images/loopon.png")
+loopbutton=ttk.Button(bottomframe, image=loopoffphoto, command=loop_music)
+loopbutton.grid(row=0, column=0, padx=10)
 
 #创建消音按钮和4个音量图标
 volmutephoto=PhotoImage(file="images/volmute.png")
