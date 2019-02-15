@@ -166,11 +166,10 @@ def start_count(t):
 #创建几个global variables
 playing=False
 pause=False
-loop=False
 mute=False
-running=False
-shuffle=False
-repeat=False
+looping=False
+shuffling=False
+repeating=False
 
 #定义function播放暂停音乐
 def play_pause_music():
@@ -267,12 +266,12 @@ def stop_music():
     statusbar["text"]="已停止播放"
     playing=False
     pause=False
-
+    
 #定义function循环播放列表
 def loop_playlist():
-    global running
+    global looping
     global playing
-    while running:
+    while looping:
         if mixer.music.get_busy() or playing==False:
             time.sleep(1.0)
         else:
@@ -280,23 +279,15 @@ def loop_playlist():
             
 #定义function循环播放音乐
 def loop_music():
-    global loop
-    global running
-    if loop==False:
-        running=True
-        loopbutton.configure(image=looponphoto)
+    global looping
+    if looping:
         t2=threading.Thread(target=loop_playlist)
         t2.start()
-        loop=True
-    else:    # if loop==True
-        running=False
-        loopbutton.configure(image=loopoffphoto)
-        loop=False
-        a=threading.enumerate()
-        print(a)
+        active_threads=threading.enumerate()
+        print(active_threads)
         #threading.enumerate() returns a list of all Thread objects currently alive,
         #It excludes terminated threads and threads that have not yet been started.
-
+   
 #定义function随机播放
 def random_play():
     global playing
@@ -321,9 +312,9 @@ def random_play():
 
 #定义function随机播放列表
 def shuffle_playlist():
-    global running
+    global shuffling
     global playing
-    while running:
+    while shuffling:
         if mixer.music.get_busy() or playing==False:
             time.sleep(1.0)
         else:
@@ -331,24 +322,14 @@ def shuffle_playlist():
             
 #定义function随机播放音乐
 def shuffle_music():
-    global shuffle
-    global running
-    if shuffle==False:
-        running=True
-        shufflebutton.configure(image=shuffleonphoto)
+    global shuffling
+    if shuffling:
         t3=threading.Thread(target=shuffle_playlist)
         t3.start()
-        shuffle=True
-    else:    # if shuffle==True
-        running=False
-        shufflebutton.configure(image=shuffleoffphoto)
-        shuffle=False
-        a=threading.enumerate()
-        print(a)
-        #threading.enumerate() returns a list of all Thread objects currently alive,
-        #It excludes terminated threads and threads that have not yet been started.
-
-#定义function
+        active_threads=threading.enumerate()
+        print(active_threads)
+    
+#定义function重复播放
 def repeat_play():
     global playing
     global selected_song_index
@@ -364,35 +345,69 @@ def repeat_play():
     playlistbox.see(selected_song_index)
     playing=True
             
-#定义function
+#定义function重复播放单曲
 def repeat_single():
-    global running
+    global repeating
     global playing
-    while running:
+    while repeating:
         if mixer.music.get_busy() or playing==False:
             time.sleep(1.0)
         else:
             repeat_play()
 
-#定义function
+#定义function重复播放音乐
 def repeat_music():
-    global repeat
-    global running
-    if repeat==False:
-        running=True
-        repeatbutton.configure(image=repeatonphoto)
-        t4=threading.Thread(target=repeat_single)
-        t4.start()
-        repeat=True
-    else:    # if repeat==True
-        running=False
-        repeatbutton.configure(image=repeatoffphoto)
-        repeat=False
-        a=threading.enumerate()
-        print(a)
-        #threading.enumerate() returns a list of all Thread objects currently alive,
-        #It excludes terminated threads and threads that have not yet been started.
-        
+    global repeating
+    if repeating:
+         t4=threading.Thread(target=repeat_single)
+         t4.start()
+         active_threads=threading.enumerate()
+         print(active_threads)
+         
+#定义function音乐播放模式
+def music_play_mode(event):
+    global repeating
+    global looping
+    global shuffling
+    global playing
+    global selected_song_index
+    play_mode_text=combobox.get()
+    if play_mode_text=='单曲播放':
+        repeating=False
+        looping=False
+        shuffling=False
+        play_mode_label.configure(image=repeatoffphoto)
+        playlistbox.selection_clear(0, END)  
+        playlistbox.selection_set(selected_song_index)
+        playlistbox.see(selected_song_index)
+    elif play_mode_text=='单曲循环':
+        looping=False
+        shuffling=False
+        repeating=True
+        repeat_music()      
+        play_mode_label.configure(image=repeatonphoto)
+        playlistbox.selection_clear(0, END)  
+        playlistbox.selection_set(selected_song_index)
+        playlistbox.see(selected_song_index)    
+    elif play_mode_text=='列表循环':
+        repeating=False
+        shuffling=False
+        looping=True
+        loop_music()
+        play_mode_label.configure(image=looponphoto)
+        playlistbox.selection_clear(0, END)  
+        playlistbox.selection_set(selected_song_index)
+        playlistbox.see(selected_song_index)
+    elif play_mode_text=='随机循环':
+        repeating=False
+        looping=False
+        shuffling=True
+        shuffle_music()
+        play_mode_label.configure(image=shuffleonphoto)
+        playlistbox.selection_clear(0, END)  
+        playlistbox.selection_set(selected_song_index)
+        playlistbox.see(selected_song_index)
+                            
 #定义function双击播放
 def double_click(event):
     global selected_song_index
@@ -409,7 +424,7 @@ def double_click(event):
     playpausebutton.configure(image=pausephoto)
     playing=True
     pause=False
-
+    
 #定义function设置音量
 def set_vol(val):
     global mute
@@ -448,16 +463,16 @@ addbutton.pack(side=LEFT)
 delbutton=ttk.Button(lbottomframe, text="- 删除", width=5, command=delete_song)
 delbutton.pack(side=LEFT, padx=3)
 
+#创建上一首按钮
+playpreviousphoto=PhotoImage(file="images/playprevious.png")
+playpreviousbutton=ttk.Button(middleframe, image=playpreviousphoto, command=play_previous)
+playpreviousbutton.grid(row=0, column=0, padx=10)
+
 #创建播放/暂停按钮
 playphoto=PhotoImage(file="images/play.png")
 pausephoto=PhotoImage(file="images/pause.png")
 playpausebutton=ttk.Button(middleframe, image=playphoto, command= play_pause_music)
 playpausebutton.grid(row=0, column=1, padx=10)
-
-#创建上一首按钮
-playpreviousphoto=PhotoImage(file="images/playprevious.png")
-playpreviousbutton=ttk.Button(middleframe, image=playpreviousphoto, command=play_previous)
-playpreviousbutton.grid(row=0, column=0, padx=10)
 
 #创建下一首按钮
 playnextphoto=PhotoImage(file="images/playnext.png")
@@ -469,23 +484,22 @@ stopphoto=PhotoImage(file="images/stop.png")
 stopbutton=ttk.Button(middleframe, image=stopphoto, command=stop_music)
 stopbutton.grid(row=0, column=3, padx=10)
 
-#创建单曲循环按钮
+#创建播放模式combobox
+play_mode=StringVar()
+combobox= ttk.Combobox(bottomframe, textvariable=play_mode)
+combobox.grid(row=0, column=0)
+combobox['values'] = ('单曲播放', '单曲循环', '列表循环', '随机循环')
+combobox.configure(state='readonly', width=8, font=('Microsoft YaHei',10))
+combobox.current(newindex=0)    #设置当前默认选项
+combobox.bind('<<ComboboxSelected>>', music_play_mode)  #切换选项时激活music_play_mode
+
+#创建播放模式Label
 repeatoffphoto=PhotoImage(file="images/repeatoff.png")
 repeatonphoto=PhotoImage(file="images/repeaton.png")
-repeatbutton=ttk.Button(bottomframe, image=repeatoffphoto, command=repeat_music)
-repeatbutton.grid(row=0, column=2, padx=6)
-
-#创建列表循环按钮
-loopoffphoto=PhotoImage(file="images/loopoff.png")
 looponphoto=PhotoImage(file="images/loopon.png")
-loopbutton=ttk.Button(bottomframe, image=loopoffphoto, command=loop_music)
-loopbutton.grid(row=0, column=3)
-
-#创建随机播放按钮
-shuffleoffphoto=PhotoImage(file="images/shuffleoff.png")
 shuffleonphoto=PhotoImage(file="images/shuffleon.png")
-shufflebutton=ttk.Button(bottomframe, image=shuffleoffphoto, command=shuffle_music)
-shufflebutton.grid(row=0, column=4, padx=6)
+play_mode_label=ttk.Label(bottomframe, image=repeatoffphoto)
+play_mode_label.grid(row=0, column=1, padx=5)
 
 #创建消音按钮和4个音量图标
 volmutephoto=PhotoImage(file="images/volmute.png")
@@ -493,14 +507,14 @@ volminphoto=PhotoImage(file="images/volmin.png")
 volmidphoto=PhotoImage(file="images/volmid.png")
 volmaxphoto=PhotoImage(file="images/volmax.png")
 volumebutton=ttk.Button(bottomframe, image=volmidphoto, command=mute_music)
-volumebutton.grid(row=0, column=5)
+volumebutton.grid(row=0, column=2)
 
 #创建音量条并设置默认音量
 scale=ttk.Scale(bottomframe, from_=0, to=100, orient=HORIZONTAL, command=set_vol)
 scale.config(length=130)    #设置scale的长度
 scale.set(70)
 mixer.music.set_volume(0.7)
-scale.grid(row=0, column=6)
+scale.grid(row=0, column=3)
 
 #绑定双击playlistbox时，执行double_click
 playlistbox.bind('<Double-1>', double_click)
