@@ -127,9 +127,7 @@ currenttimelabel.pack()
 #定义function显示细节，计算总时长，开启线程
 def show_details(play_song):
     filelabel["text"]=os.path.basename(play_song)
-
     file_data=os.path.splitext(play_song)
-
     if file_data[1]=='.mp3':
         audio=MP3(play_song)
         total_length=audio.info.length
@@ -202,9 +200,7 @@ def play_pause_music():
             show_details(play_it)
             playpausebutton.configure(image=pausephoto)
             playing=True
-            play_mode_text=combobox.get()  #获取combobox选项里的value
-            if play_mode_text=='单曲播放':
-                playing_music()
+            music_play_mode()
         except:
             messagebox.showerror(title="无音乐文件", message='''请从左侧选择您想听的音乐，再点击播放。''')
 
@@ -240,6 +236,8 @@ def play_previous():
     global selected_song_index
     global playing
     global pause
+    global running
+    running=False
     mixer.music.stop()
     time.sleep(0.1)
     a=len(playlist)-1
@@ -261,16 +259,19 @@ def play_previous():
     playlistbox.see(selected_song_index)
     playing=True
     pause=False
+    playing_music()
     
 #定义function停止播放音乐
 def stop_music():
     global playing
     global pause
+    global running
     mixer.music.stop()
     playpausebutton.configure(image=playphoto)
     statusbar["text"]="已停止播放"
     playing=False
     pause=False
+    running=False
     
 #定义function循环播放列表
 def loop_playlist():
@@ -373,12 +374,11 @@ def repeat_music():
 def playing_one():
     global running
     while running:
-        if mixer.music.get_busy():
+        if mixer.music.get_busy() or playing==False:
             time.sleep(1.0)
             print('running')
         else:
             stop_music()
-            running=False
             print('running=False')
 
 #定义function
@@ -392,10 +392,11 @@ def playing_music():
         print(active_threads)
          
 #定义function音乐播放模式
-def music_play_mode(event):
+def music_play_mode():
     global repeating
     global looping
     global shuffling
+    global running
     global selected_song_index
     global play_mode_text
     play_mode_text=combobox.get()  #获取combobox选项里的value
@@ -408,18 +409,21 @@ def music_play_mode(event):
     elif play_mode_text=='单曲循环':
         looping=False
         shuffling=False
+        running=False
         repeating=True
         repeat_music()      
         play_mode_label.configure(image=repeatonphoto)
     elif play_mode_text=='列表循环':
         repeating=False
         shuffling=False
+        running=False
         looping=True
         loop_music()
         play_mode_label.configure(image=looponphoto)
     elif play_mode_text=='随机循环':
         repeating=False
         looping=False
+        running=False
         shuffling=True
         shuffle_music()
         play_mode_label.configure(image=shuffleonphoto)
@@ -443,7 +447,7 @@ def double_click(event):
     playpausebutton.configure(image=pausephoto)
     playing=True
     pause=False
-    playing_music()
+    music_play_mode()
     
 #定义function设置音量
 def set_vol(val):
@@ -511,7 +515,7 @@ combobox.grid(row=0, column=0)
 combobox['values'] = ('单曲播放', '单曲循环', '列表循环', '随机循环')
 combobox.configure(state='readonly', width=8, font=('Microsoft YaHei',10))
 combobox.current(newindex=0)    #设置当前默认选项
-combobox.bind('<<ComboboxSelected>>', music_play_mode)  #切换选项时激活music_play_mode
+combobox.bind('<<ComboboxSelected>>', lambda x: music_play_mode())  #切换选项时激活music_play_mode
 
 #创建播放模式Label
 repeatoffphoto=PhotoImage(file="images/repeatoff.png")
