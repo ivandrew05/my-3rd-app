@@ -237,7 +237,6 @@ def play_previous():
     global playing
     global pause
     global running
-    running=False
     mixer.music.stop()
     time.sleep(0.1)
     a=len(playlist)-1
@@ -259,7 +258,7 @@ def play_previous():
     playlistbox.see(selected_song_index)
     playing=True
     pause=False
-    playing_music()
+    music_play_mode()
     
 #定义function停止播放音乐
 def stop_music():
@@ -373,12 +372,14 @@ def repeat_music():
 #定义function
 def playing_one():
     global running
+    global playing
     while running:
         if mixer.music.get_busy() or playing==False:
             time.sleep(1.0)
             print('running')
         else:
             stop_music()
+            running=False
             print('running=False')
 
 #定义function
@@ -400,10 +401,10 @@ def music_play_mode():
     global selected_song_index
     global play_mode_text
     play_mode_text=combobox.get()  #获取combobox选项里的value
-    if play_mode_text=='单曲播放':
+    if play_mode_text=='单曲播放' and running==False:
         repeating=False
         looping=False
-        shuffling=False
+        shuffling=False 
         playing_music()
         play_mode_label.configure(image=repeatoffphoto)
     elif play_mode_text=='单曲循环':
