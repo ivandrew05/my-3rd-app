@@ -375,8 +375,9 @@ def repeat_music():
 def playing_one2():
     global running2
     global playing
+    global pause
     while running2==False:
-        if mixer.music.get_busy() or playing==False:
+        if mixer.music.get_busy() or playing==False or pause==False:
             time.sleep(1.0)
             print('running2')
         else:
@@ -390,13 +391,14 @@ def playing_music2():
         t6.start()
         active_threads=threading.enumerate()
         print(active_threads)
-
+    
 #定义function
 def playing_one1():
     global running1
     global playing
+    global pause
     while running1:
-        if mixer.music.get_busy() or playing==False:
+        if mixer.music.get_busy() or playing==False or pause==False:
             time.sleep(1.0)
             print('running1')
         else:
@@ -404,13 +406,13 @@ def playing_one1():
 
 #定义function
 def playing_music1():
-    global running1 
+    global running1
     if running1:
         t5=threading.Thread(target=playing_one1)
         t5.start()
         active_threads=threading.enumerate()
         print(active_threads)
-         
+    
 #定义function音乐播放模式
 def music_play_mode():
     global repeating
