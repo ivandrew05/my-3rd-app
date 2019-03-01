@@ -274,8 +274,6 @@ def stop_music():
     statusbar["text"]="已停止播放"
     playing=False
     pause=False
-    running1=False
-    running2=True
     
 #定义function循环播放列表
 def loop_playlist():
@@ -380,9 +378,9 @@ def playing_one2():
     global playing
     global pause
     pause=False
-    playpausebutton.configure(image=pausephoto)
+    #playpausebutton.configure(image=pausephoto)
     while running2==False:
-        if mixer.music.get_busy() or playing==False:
+        if mixer.music.get_busy():
             time.sleep(1.0)
             print('running2')
         else:
@@ -396,8 +394,6 @@ def playing_music2():
     if running2==False:
         t6=threading.Thread(target=playing_one2)
         t6.start()
-        active_threads=threading.enumerate()
-        print(active_threads)
     
 #定义function
 def playing_one1():
@@ -405,9 +401,9 @@ def playing_one1():
     global playing
     global pause
     pause=False
-    playpausebutton.configure(image=pausephoto)
+    #playpausebutton.configure(image=pausephoto)
     while running1:
-        if mixer.music.get_busy() or playing==False:
+        if mixer.music.get_busy():
             time.sleep(1.0)
             print('running1')
         else:
@@ -421,8 +417,6 @@ def playing_music1():
     if running1:
         t5=threading.Thread(target=playing_one1)
         t5.start()
-        active_threads=threading.enumerate()
-        print(active_threads)
     
 #定义function音乐播放模式
 def music_play_mode():
