@@ -126,6 +126,7 @@ currenttimelabel.pack()
 
 #定义function显示细节，计算总时长，开启线程
 def show_details(play_song):
+    global total_length
     filelabel["text"]=os.path.basename(play_song)
     file_data=os.path.splitext(play_song)
     if file_data[1]=='.mp3':
@@ -148,6 +149,7 @@ def show_details(play_song):
 #定义function计算当前播放时间
 def start_count(t):
     global pause
+    global current_time
     current_time=0
     while current_time<=t and mixer.music.get_busy():
         if pause:
@@ -206,6 +208,12 @@ def play_pause_music():
 
 #定义function播放下一首
 def play_next():
+    global running
+    running=False
+    loop_play_next()
+    music_play_mode()
+
+def loop_play_next():
     global selected_song_index
     global playing
     global pause
@@ -231,14 +239,12 @@ def play_next():
     playlistbox.see(selected_song_index)    #保证选择的item在playlistbox中可见
     playing=True
     pause=False
-    music_play_mode()
     
 #定义function播放上一首
 def play_previous():
     global selected_song_index
     global playing
     global pause
-    global running
     mixer.music.stop()
     time.sleep(0.1)
     a=len(playlist)-1
@@ -272,6 +278,7 @@ def stop_music():
     statusbar["text"]="已停止播放"
     playing=False
     pause=False
+    running=False
     
 #定义function循环播放列表
 def loop_playlist():
@@ -281,7 +288,7 @@ def loop_playlist():
         if mixer.music.get_busy() or playing==False:
             time.sleep(1.0)
         else:
-            play_next()
+            loop_play_next()
             
 #定义function循环播放音乐
 def loop_music():
@@ -375,14 +382,14 @@ def playing_one():
     global running
     global playing
     global pause
-    #playpausebutton.configure(image=pausephoto)
+    global total_length
+    global current_time
     while running:
-        if mixer.music.get_busy():
+        if current_time<=total_length:
             time.sleep(1.0)
             print('running')
         else:
             stop_music()
-            running=False
             print('running=False')
 
 #定义function
