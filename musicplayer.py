@@ -170,8 +170,7 @@ mute=False
 looping=False
 shuffling=False
 repeating=False
-running1=False
-running2=False
+running=False
 
 #定义function播放暂停音乐
 def play_pause_music():
@@ -209,10 +208,8 @@ def play_pause_music():
 
 #定义function播放下一首
 def play_next():
-    global running1
-    global running2
+    global running
     loop_play_next()
-    #running1=True
     music_play_mode()
 
 def loop_play_next():
@@ -274,12 +271,13 @@ def play_previous():
 def stop_music():
     global playing
     global pause
-    global running1
+    global running
     mixer.music.stop()
     playpausebutton.configure(image=playphoto)
     statusbar["text"]="已停止播放"
     playing=False
     pause=False
+    running=False
     
 #定义function循环播放列表
 def loop_playlist():
@@ -377,46 +375,25 @@ def repeat_music():
          t4.start()
          active_threads=threading.enumerate()
          print(active_threads)
-         
-#定义function
-def playing_one2():
-    global running2
-    global total_length
-    global current_time
-    while running2:
-        if current_time<=total_length:
-            time.sleep(1.0)
-            print('running2')
-        else:
-            stop_music()
-            running2=False
-            print('running2=False')
-
-#定义function
-def playing_music2():
-    global running2
-    if running2:
-        t6=threading.Thread(target=playing_one2)
-        t6.start()
         
 #定义function
 def playing_one():
-    global running1
+    global running
     global total_length
     global current_time
-    while running1:
+    while running:
         if current_time<=total_length:
             time.sleep(1.0)
-            print('running1')
+            print('running')
         else:
             stop_music()
-            running1=False
-            print('running1=False')
+            running=False
+            print('running=False')
         
 #定义function
 def playing_music():
-    global running1
-    if running1:
+    global running
+    if running:
         t5=threading.Thread(target=playing_one)
         t5.start()
 
@@ -425,43 +402,35 @@ def music_play_mode():
     global repeating
     global looping
     global shuffling
-    global running1
-    global running2
+    global running
     global selected_song_index
     global play_mode_text
     play_mode_text=combobox.get()  #获取combobox选项里的value
-    if play_mode_text=='单曲播放' and running1==False:
+    if play_mode_text=='单曲播放' and running==False:
         repeating=False
         looping=False
         shuffling=False
-        running1=True
+        running=True
         playing_music()
-        play_mode_label.configure(image=repeatoffphoto)
-    elif play_mode_text=='单曲播放' and running2==False:
-        repeating=False
-        looping=False
-        shuffling=False
-        running2=True
-        playing_music2()
         play_mode_label.configure(image=repeatoffphoto)
     elif play_mode_text=='单曲循环':
         looping=False
         shuffling=False
-        running1=False
+        running=False
         repeating=True
         repeat_music()      
         play_mode_label.configure(image=repeatonphoto)
     elif play_mode_text=='列表循环':
         repeating=False
         shuffling=False
-        running1=False
+        running=False
         looping=True
         loop_music()
         play_mode_label.configure(image=looponphoto)
     elif play_mode_text=='随机循环':
         repeating=False
         looping=False
-        running1=False
+        running=False
         shuffling=True
         shuffle_music()
         play_mode_label.configure(image=shuffleonphoto)
