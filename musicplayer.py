@@ -132,10 +132,12 @@ def show_details(play_song):
     if file_data[1]=='.mp3':
         audio=MP3(play_song)
         total_length=audio.info.length
+        total_length=round(total_length)
     else:
         a=mixer.Sound(play_song)
         total_length=a.get_length()
-
+        total_length=round(total_length)
+        
     #div - total_length/60,  mod - total_length % 60
     mins, secs =divmod(total_length, 60)
     mins =round(mins)
@@ -143,25 +145,26 @@ def show_details(play_song):
     timeformat= "{:02d}:{:02d}".format(mins, secs)
     lengthlabel["text"]="总时长 - "+timeformat
     
-    t1=threading.Thread(target=start_count, args=(total_length,))
+    t1=threading.Thread(target=start_count)
     t1.start()
 
 #定义function计算当前播放时间
-def start_count(t):
+def start_count():
     global pause
     global current_time
+    global total_length
     current_time=0
-    while current_time<=t and mixer.music.get_busy():
+    while current_time<=total_length and mixer.music.get_busy():
         if pause:
             continue
         else:
-            mins, secs =divmod(current_time, 60)
-            mins =round(mins)
+            mins, secs=divmod(current_time, 60)
+            mins=round(mins)
             secs=round(secs)
-            timeformat= "{:02d}:{:02d}".format(mins, secs)
+            timeformat="{:02d}:{:02d}".format(mins, secs)
             currenttimelabel['text']="已播放 - " + timeformat
-            time.sleep(0.1)
-            current_time=current_time+0.1
+            time.sleep(0.125)
+            current_time=current_time+0.125
 
 #创建几个global variables
 playing=False
@@ -192,7 +195,7 @@ def play_pause_music():
     else:  #if playing=False
         try:
             mixer.music.stop()
-            time.sleep(0.1)
+            time.sleep(0.125)
             selected_song=playlistbox.curselection()
             selected_song_index=int(selected_song[0])
             play_it=playlist[selected_song_index]
@@ -218,7 +221,7 @@ def loop_play_next():
     global pause
     global play_mode_text
     mixer.music.stop()
-    time.sleep(0.1)
+    time.sleep(0.125)
     a=len(playlist)-1
     if selected_song_index<a:
         selected_song_index=selected_song_index+1
@@ -245,7 +248,7 @@ def play_previous():
     global playing
     global pause
     mixer.music.stop()
-    time.sleep(0.1)
+    time.sleep(0.125)
     a=len(playlist)-1
     if selected_song_index==0:
         mixer.music.load(playlist[-1])
@@ -303,7 +306,7 @@ def loop_music():
 #定义function随机播放
 def random_play():
     global playing
-    time.sleep(0.1)
+    time.sleep(0.125)
     selected_song=playlistbox.curselection()
     selected_song_index=int(selected_song[0])
     #随机从playlist中选出一个item的index
@@ -345,7 +348,7 @@ def shuffle_music():
 def repeat_play():
     global playing
     global selected_song_index
-    time.sleep(0.1)
+    time.sleep(0.125)
     selected_song=playlist[selected_song_index]
     mixer.music.load(selected_song)
     mixer.music.play()
@@ -385,11 +388,15 @@ def playing_one():
         if current_time<=total_length:
             time.sleep(1.0)
             print('running')
+            print(current_time)
+            print(total_length)
         else:
             stop_music()
             running=False
             print('running=False')
-        
+            print(current_time)
+            print(total_length)
+            
 #定义function
 def playing_music():
     global running
@@ -444,7 +451,7 @@ def double_click(event):
     global playing
     global pause
     stop_music()
-    time.sleep(0.1)
+    time.sleep(0.125)
     selected_song=playlistbox.curselection()
     selected_song_index=int(selected_song[0])
     mixer.music.load(playlist[selected_song_index])
@@ -459,7 +466,7 @@ def double_click(event):
 #定义function设置音量
 def set_vol(val):
     global mute
-    volume= float(val)/100
+    volume=float(val)/100
     mixer.music.set_volume(volume)    #mixer set_volume only takes value from 0 to 1
     if volume==0:
         volumebutton.configure(image=volmutephoto)
