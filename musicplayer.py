@@ -139,10 +139,10 @@ def show_details(play_song):
         total_length=round(total_length)
         
     #div - total_length/60,  mod - total_length % 60
-    mins, secs =divmod(total_length, 60)
-    mins =round(mins)
+    mins, secs=divmod(total_length, 60)
+    mins=round(mins)
     secs=round(secs)
-    timeformat= "{:02d}:{:02d}".format(mins, secs)
+    timeformat="{:02d}:{:02d}".format(mins, secs)
     lengthlabel["text"]="总时长 - "+timeformat
     
     t1=threading.Thread(target=start_count)
@@ -392,7 +392,6 @@ def playing_one():
             print(total_length)
         else:
             stop_music()
-            running=False
             print('running=False')
             print(current_time)
             print(total_length)
