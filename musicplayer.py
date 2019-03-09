@@ -132,11 +132,9 @@ def show_details(play_song):
     if file_data[1]=='.mp3':
         audio=MP3(play_song)
         total_length=audio.info.length
-        total_length=round(total_length)
     else:
         a=mixer.Sound(play_song)
         total_length=a.get_length()
-        total_length=round(total_length)
         
     #div - total_length/60,  mod - total_length % 60
     mins, secs=divmod(total_length, 60)
@@ -151,6 +149,7 @@ def show_details(play_song):
 #定义function计算当前播放时间
 def start_count():
     global pause
+    global running
     global current_time
     global total_length
     current_time=0
@@ -165,6 +164,7 @@ def start_count():
             currenttimelabel['text']="已播放 - " + timeformat
             time.sleep(0.125)
             current_time=current_time+0.125
+    current_time=current_time+1 #保证上方的while loop终止后，current_time一定大于total_length
 
 #创建几个global variables
 playing=False
