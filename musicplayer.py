@@ -149,7 +149,6 @@ def show_details(play_song):
 #定义function计算当前播放时间
 def start_count():
     global pause
-    global running
     global current_time
     global total_length
     current_time=0
@@ -179,7 +178,6 @@ running=False
 def play_pause_music():
     global playing
     global selected_song_index
-    global play_mode_text
     if playing: #if playing=True
         global pause
         if pause: #if pause=True
@@ -211,15 +209,14 @@ def play_pause_music():
 
 #定义function播放下一首
 def play_next():
-    global running
     loop_play_next()
     music_play_mode()
 
+#定义function播放下一首(循环播放列表模式)
 def loop_play_next():
-    global selected_song_index
     global playing
     global pause
-    global play_mode_text
+    global selected_song_index
     mixer.music.stop()
     time.sleep(0.125)
     a=len(playlist)-1
@@ -244,9 +241,9 @@ def loop_play_next():
     
 #定义function播放上一首
 def play_previous():
-    global selected_song_index
     global playing
     global pause
+    global selected_song_index
     mixer.music.stop()
     time.sleep(0.125)
     a=len(playlist)-1
@@ -370,7 +367,7 @@ def repeat_single():
         else:
             repeat_play()
 
-#定义function
+#定义function重复播放音乐
 def repeat_music():
     global repeating
     if repeating:
@@ -379,7 +376,7 @@ def repeat_music():
          active_threads=threading.enumerate()
          print(active_threads)
         
-#定义function
+#如下所述
 def playing_one():
     global running
     global total_length
@@ -396,7 +393,7 @@ def playing_one():
             print(current_time)
             print(total_length)
             
-#定义function
+#该function和上面的function用于单曲播放模式下，单曲播放完后更改相应的设置
 def playing_music():
     global running
     if running:
