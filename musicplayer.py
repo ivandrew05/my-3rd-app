@@ -1,5 +1,6 @@
 import os
 import time
+import math
 import threading
 
 from tkinter import *
@@ -124,6 +125,15 @@ lengthlabel.pack()
 currenttimelabel=ttk.Label(topframe, text="已播放 : --:--")
 currenttimelabel.pack()
 
+def playing_progress(ar):
+    pass
+
+#创建播放进度条
+progress_bar=ttk.Scale(topframe, command=playing_progress)
+progress_bar.config(from_=0, to=100, orient=HORIZONTAL, length=434)    #设置scale的长度
+progress_bar.set(0)
+progress_bar.pack()
+
 #定义function显示细节，计算总时长，开启线程
 def show_details(play_song):
     global total_length
@@ -132,6 +142,7 @@ def show_details(play_song):
     if file_data[1]=='.mp3':
         audio=MP3(play_song)
         total_length=audio.info.length
+        #total_length=int(math.ceil(total_length))
     else:
         a=mixer.Sound(play_song)
         total_length=a.get_length()
@@ -164,7 +175,7 @@ def start_count():
             time.sleep(0.125)
             current_time=current_time+0.125
     current_time=current_time+1 #保证上方的while loop终止后，current_time一定大于total_length
-
+    
 #创建几个global variables
 playing=False
 pause=False
@@ -387,11 +398,14 @@ def playing_one():
             print('running')
             print(current_time)
             print(total_length)
+            progress_value=100*current_time/total_length
+            progress_bar.set(progress_value)
         else:
             stop_music()
             print('running=False')
             print(current_time)
             print(total_length)
+            progress_bar.set(0)
             
 #该function和上面的function用于单曲播放模式下，单曲播放完后更改相应的设置
 def playing_music():
