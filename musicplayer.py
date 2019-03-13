@@ -170,16 +170,20 @@ def start_count():
 def playing_progress(val):
     global total_length
     global current_time
+    global selected_song_index
     reset_value=progress_bar.get()
-    #print(reset_value)
-    #current_time=reset_value*total_length
-    #mixer.music.rewind()
-    #mixer.music.set_pos(reset_value)
+    print(reset_value)
+    reset_time=reset_value*total_length/100
+    mixer.music.stop()
+    mixer.music.load(playlist[selected_song_index])
+    mixer.music.play(0, reset_time)
     
 #创建播放进度条
-progress_bar=ttk.Scale(topframe, command=playing_progress)
-progress_bar.config(from_=0, to=100, orient=HORIZONTAL, length=434)  #设置scale的长度
+progress_bar=ttk.Scale(topframe, from_=0, to=100)
+progress_bar.bind("<ButtonRelease-1>", playing_progress)
+progress_bar.config(orient=HORIZONTAL, length=434)  #设置scale的长度
 progress_bar.set(0)
+
 progress_bar.pack()
 
 #创建几个global variables
@@ -405,7 +409,7 @@ def playing_one():
             print(current_time)
             print(total_length)
             progress_value=100*current_time/total_length
-            progress_bar.set(progress_value)
+            #progress_bar.set(progress_value)
         else:
             stop_music()
             print('running=False')
