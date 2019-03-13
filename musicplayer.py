@@ -180,7 +180,7 @@ def playing_progress(val):
     
 #创建播放进度条
 progress_bar=ttk.Scale(topframe, from_=0, to=100)
-progress_bar.bind("<B1-Motion>", playing_progress)
+progress_bar.bind("<ButtonRelease-1>", playing_progress)
 progress_bar.config(orient=HORIZONTAL, length=434)  #设置scale的长度
 progress_bar.set(0)
 
