@@ -133,7 +133,6 @@ def show_details(play_song):
     if file_data[1]=='.mp3':
         audio=MP3(play_song)
         total_length=audio.info.length
-        #total_length=int(math.ceil(total_length))
     else:
         a=mixer.Sound(play_song)
         total_length=a.get_length()
@@ -152,7 +151,6 @@ def show_details(play_song):
 def start_count():
     global pause
     global current_time
-    global total_length
     current_time=0
     while current_time<=total_length and mixer.music.get_busy():
         if pause:
@@ -167,23 +165,24 @@ def start_count():
             current_time=current_time+0.125
     current_time=current_time+1  #保证上方的while loop终止后，current_time一定大于total_length
 
+#定义function播放进度
 def playing_progress(val):
     global total_length
     global current_time
     global selected_song_index
+    global reset_value
     reset_value=progress_bar.get()
-    print(reset_value)
-    reset_time=reset_value*total_length/100
+    current_time=reset_value*total_length/100
     mixer.music.stop()
     mixer.music.load(playlist[selected_song_index])
-    mixer.music.play(0, reset_time)
+    mixer.music.play(0, current_time)
+    print('playing_progress')
     
 #创建播放进度条
 progress_bar=ttk.Scale(topframe, from_=0, to=100)
-progress_bar.bind("<ButtonRelease-1>", playing_progress)
-progress_bar.config(orient=HORIZONTAL, length=434)  #设置scale的长度
+progress_bar.bind("<ButtonRelease-1>", playing_progress) #拖动并释放鼠标左键时，激活playing_progress
+progress_bar.config(orient=HORIZONTAL, length=434) #设置scale的长度
 progress_bar.set(0)
-
 progress_bar.pack()
 
 #创建几个global variables
@@ -293,12 +292,14 @@ def stop_music():
     global playing
     global pause
     global running
+    global current_time
     mixer.music.stop()
     playpausebutton.configure(image=playphoto)
     statusbar["text"]="已停止播放"
     playing=False
     pause=False
     running=False
+    current_time=0
     
 #定义function循环播放列表
 def loop_playlist():
@@ -406,14 +407,12 @@ def playing_one():
         if current_time<=total_length:
             time.sleep(1.0)
             print('running')
-            print(current_time)
             print(total_length)
-            progress_value=100*current_time/total_length
-            #progress_bar.set(progress_value)
+            reset_value=100*current_time/total_length
+            progress_bar.set(reset_value)
         else:
             stop_music()
             print('running=False')
-            print(current_time)
             print(total_length)
             time.sleep(0.5)
             progress_bar.set(0)
