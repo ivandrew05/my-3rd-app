@@ -270,6 +270,8 @@ def loop_play_next():
     global playing
     global pause
     global selected_song_index
+    global current_time
+    current_time=0
     mixer.music.stop()
     time.sleep(0.125)
     a=len(playlist)-1
@@ -297,6 +299,8 @@ def play_previous():
     global playing
     global pause
     global selected_song_index
+    global current_time
+    current_time=0
     mixer.music.stop()
     time.sleep(0.125)
     a=len(playlist)-1
