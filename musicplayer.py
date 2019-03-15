@@ -150,7 +150,6 @@ def show_details(play_song):
 def start_count():
     global pause
     global current_time
-    current_time=0
     while current_time<=total_length and mixer.music.get_busy():
         if pause:
             continue
@@ -171,8 +170,8 @@ def playing_progress(val):
     global selected_song_index
     global reset_value
     global resetting
-    global running
-    if running:
+    global playing
+    if playing:
         reset_value=progress_bar.get()
         current_time=reset_value*total_length/100
         mixer.music.stop()
@@ -183,7 +182,10 @@ def playing_progress(val):
             stop_music()
             progress_bar.set(0)
             currenttimelabel['text']="已播放 - 00:00"
-            
+    else:
+        reset_value=progress_bar.get()
+        current_time=reset_value*total_length/100
+                  
 #定义function进度重置
 def progress_resetting(val):
     global resetting
@@ -219,11 +221,14 @@ looping=False
 shuffling=False
 repeating=False
 running=False
+current_time=0
 
 #定义function播放暂停音乐
 def play_pause_music():
     global playing
     global selected_song_index
+    global current_time
+    global reset_value
     if playing: #if playing=True
         global pause
         if pause: #if pause=True
@@ -244,7 +249,9 @@ def play_pause_music():
             selected_song_index=int(selected_song[0])
             play_it=playlist[selected_song_index]
             mixer.music.load(play_it)
-            mixer.music.play()
+            mixer.music.play(0, current_time)
+            reset_value=progress_bar.get()
+            progress_bar.set(reset_value)
             statusbar["text"]="正在播放-"+os.path.basename(play_it)
             show_details(play_it)
             playpausebutton.configure(image=pausephoto)
@@ -326,6 +333,7 @@ def stop_music():
     pause=False
     running=False
     current_time=0
+    print('running=False')
     
 #定义function循环播放列表
 def loop_playlist():
@@ -442,7 +450,6 @@ def playing_one():
                 progress_bar.set(reset_value)
         else:
             stop_music()
-            print('running=False')
             time.sleep(1.0)
             progress_bar.set(0)
             
