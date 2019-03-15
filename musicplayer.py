@@ -1,6 +1,5 @@
 import os
 import time
-import math
 import threading
 
 from tkinter import *
@@ -171,16 +170,43 @@ def playing_progress(val):
     global current_time
     global selected_song_index
     global reset_value
+    global resetting
+    global running
+    if running:
+        reset_value=progress_bar.get()
+        current_time=reset_value*total_length/100
+        mixer.music.stop()
+        mixer.music.load(playlist[selected_song_index])
+        mixer.music.play(0, current_time)  #第一个argument表示播放次数，第二个表示开始播放的时间点
+        resetting=False
+        if reset_value==100:
+            stop_music()
+            progress_bar.set(0)
+            currenttimelabel['text']="已播放 - 00:00"
+            
+#定义function进度重置
+def progress_resetting(val):
+    global resetting
+    resetting=True
+    
+#定义function时间重置
+def time_resetting(val):
+    global current_time
+    global reset_value
     reset_value=progress_bar.get()
     current_time=reset_value*total_length/100
-    mixer.music.stop()
-    mixer.music.load(playlist[selected_song_index])
-    mixer.music.play(0, current_time)
-    print('playing_progress')
-    
+    print(reset_value)
+    mins, secs=divmod(current_time, 60)
+    mins=round(mins)
+    secs=round(secs)
+    timeformat="{:02d}:{:02d}".format(mins, secs)
+    currenttimelabel['text']="已播放 - " + timeformat
+        
 #创建播放进度条
 progress_bar=ttk.Scale(topframe, from_=0, to=100)
-progress_bar.bind("<ButtonRelease-1>", playing_progress) #拖动并释放鼠标左键时，激活playing_progress
+progress_bar.bind("<Button-1>", progress_resetting) #按下鼠标左键时，激活progress_resetting
+progress_bar.bind("<B1-Motion>", time_resetting) #按下鼠标左键并拖动时，激活time_resetting
+progress_bar.bind("<ButtonRelease-1>", playing_progress) #释放鼠标左键时，激活playing_progress
 progress_bar.config(orient=HORIZONTAL, length=434) #设置scale的长度
 progress_bar.set(0)
 progress_bar.pack()
@@ -403,18 +429,21 @@ def playing_one():
     global running
     global total_length
     global current_time
+    global resetting
+    resetting=False
     while running:
         if current_time<=total_length:
             time.sleep(1.0)
             print('running')
-            print(total_length)
             reset_value=100*current_time/total_length
-            progress_bar.set(reset_value)
+            if resetting:
+                continue
+            else:
+                progress_bar.set(reset_value)
         else:
             stop_music()
             print('running=False')
-            print(total_length)
-            time.sleep(0.5)
+            time.sleep(1.0)
             progress_bar.set(0)
             
 #该function和上面的function用于单曲播放模式下，单曲播放完后更改相应的设置
