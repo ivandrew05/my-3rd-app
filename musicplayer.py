@@ -197,7 +197,6 @@ def time_resetting(val):
     global reset_value
     reset_value=progress_bar.get()
     current_time=reset_value*total_length/100
-    print(reset_value)
     mins, secs=divmod(current_time, 60)
     mins=round(mins)
     secs=round(secs)
@@ -221,6 +220,7 @@ looping=False
 shuffling=False
 repeating=False
 running=False
+sliding=False
 current_time=0
 
 #定义function播放暂停音乐
@@ -271,10 +271,10 @@ def loop_play_next():
     global pause
     global selected_song_index
     global current_time
-    current_time=0
     mixer.music.stop()
     time.sleep(0.125)
     a=len(playlist)-1
+    current_time=0
     if selected_song_index<a:
         selected_song_index=selected_song_index+1
         mixer.music.load(playlist[selected_song_index])
@@ -300,10 +300,10 @@ def play_previous():
     global pause
     global selected_song_index
     global current_time
-    current_time=0
     mixer.music.stop()
     time.sleep(0.125)
     a=len(playlist)-1
+    current_time=0
     if selected_song_index==0:
         mixer.music.load(playlist[-1])
         mixer.music.play()
@@ -336,6 +336,7 @@ def stop_music():
     playing=False
     pause=False
     running=False
+    sliding=False
     current_time=0
     print('running=False')
     
@@ -400,16 +401,42 @@ def shuffle_music():
         t3.start()
         active_threads=threading.enumerate()
         print(active_threads)
+        
+#定义function进度条滑块 
+def progress_slide():
+    global sliding
+    global total_length
+    global current_time
+    global resetting
+    resetting=False
+    while sliding:
+        if current_time<=total_length:
+            time.sleep(1.0)
+            print('sliding')
+            reset_value=100*current_time/total_length
+            if resetting:
+                continue
+            else:
+                progress_bar.set(reset_value)
     
+#定义function进度条线程
+def progress_thread():
+    global sliding
+    if sliding:
+        t6=threading.Thread(target=progress_slide)
+        t6.start()
+        
 #定义function重复播放
 def repeat_play():
     global playing
     global selected_song_index
+    global current_time
     time.sleep(0.125)
     selected_song=playlist[selected_song_index]
     mixer.music.load(selected_song)
     mixer.music.play()
     statusbar["text"]="正在播放-"+os.path.basename(selected_song)
+    current_time=0
     show_details(selected_song)
     playpausebutton.configure(image=pausephoto)
     playlistbox.selection_clear(0, END) 
@@ -472,20 +499,24 @@ def music_play_mode():
     global running
     global selected_song_index
     global play_mode_text
+    global sliding
     play_mode_text=combobox.get()  #获取combobox选项里的value
     if play_mode_text=='单曲播放' and running==False:
         repeating=False
         looping=False
         shuffling=False
+        sliding=False
         running=True
         playing_music()
         play_mode_label.configure(image=repeatoffphoto)
-    elif play_mode_text=='单曲循环':
+    elif play_mode_text=='单曲循环' and sliding==False:
         looping=False
         shuffling=False
         running=False
-        repeating=True
-        repeat_music()      
+        sliding=True
+        repeating=True 
+        repeat_music()
+        progress_thread()
         play_mode_label.configure(image=repeatonphoto)
     elif play_mode_text=='列表循环':
         repeating=False
@@ -493,6 +524,7 @@ def music_play_mode():
         running=False
         looping=True
         loop_music()
+        progress_thread()
         play_mode_label.configure(image=looponphoto)
     elif play_mode_text=='随机循环':
         repeating=False
@@ -500,6 +532,7 @@ def music_play_mode():
         running=False
         shuffling=True
         shuffle_music()
+        progress_thread()
         play_mode_label.configure(image=shuffleonphoto)
     playlistbox.selection_clear(0, END)  
     playlistbox.selection_set(selected_song_index)
