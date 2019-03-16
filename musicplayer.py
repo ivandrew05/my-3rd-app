@@ -168,6 +168,7 @@ def playing_progress(val):
     global total_length
     global current_time
     global selected_song_index
+    global play_mode_text
     global reset_value
     global resetting
     global playing
@@ -178,7 +179,7 @@ def playing_progress(val):
         mixer.music.load(playlist[selected_song_index])
         mixer.music.play(0, current_time)  #第一个argument表示播放次数，第二个表示开始播放的时间点
         resetting=False
-        if reset_value==100:
+        if reset_value==100 and play_mode_text=='单曲播放':
             stop_music()
             progress_bar.set(0)
             currenttimelabel['text']="已播放 - 00:00"
@@ -490,6 +491,8 @@ def playing_music():
     if running:
         t5=threading.Thread(target=playing_one)
         t5.start()
+        active_threads=threading.enumerate()
+        print(active_threads)
 
 #定义function音乐播放模式
 def music_play_mode():
