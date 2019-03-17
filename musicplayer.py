@@ -168,20 +168,17 @@ def playing_progress(val):
     global total_length
     global current_time
     global selected_song_index
-    global random_song_index
-    global shuffling
     global play_mode_text
     global reset_value
     global resetting
     global playing
+    selected_song=playlistbox.curselection()
+    selected_song_index=int(selected_song[0])
     if playing:
         reset_value=progress_bar.get()
         current_time=reset_value*total_length/100
         mixer.music.stop()
-        if shuffling:
-            mixer.music.load(playlist[random_song_index])
-        else:
-            mixer.music.load(playlist[selected_song_index])
+        mixer.music.load(playlist[selected_song_index])
         mixer.music.play(0, current_time)  #第一个argument表示播放次数，第二个表示开始播放的时间点
         resetting=False
         if reset_value==100 and play_mode_text=='单曲播放':
@@ -356,14 +353,8 @@ def loop_playlist():
             
 #定义function循环播放音乐
 def loop_music():
-    global looping
-    if looping:
-        t2=threading.Thread(target=loop_playlist)
-        t2.start()
-        active_threads=threading.enumerate()
-        print(active_threads)
-        #threading.enumerate() returns a list of all Thread objects currently alive,
-        #It excludes terminated threads and threads that have not yet been started.
+    t2=threading.Thread(target=loop_playlist)
+    t2.start()
    
 #定义function随机播放
 def random_play():
@@ -403,12 +394,8 @@ def shuffle_playlist():
             
 #定义function随机播放音乐
 def shuffle_music():
-    global shuffling
-    if shuffling:
-        t3=threading.Thread(target=shuffle_playlist)
-        t3.start()
-        active_threads=threading.enumerate()
-        print(active_threads)
+    t3=threading.Thread(target=shuffle_playlist)
+    t3.start()
         
 #定义function重复播放
 def repeat_play():
@@ -440,13 +427,9 @@ def repeat_single():
 
 #定义function重复播放音乐
 def repeat_music():
-    global repeating
-    if repeating:
-         t4=threading.Thread(target=repeat_single)
-         t4.start()
-         active_threads=threading.enumerate()
-         print(active_threads)
-              
+    t4=threading.Thread(target=repeat_single)
+    t4.start()
+         
 #定义function进度条滑块 
 def progress_slide():
     global sliding
@@ -462,6 +445,10 @@ def progress_slide():
         if current_time<=total_length:
             time.sleep(1.0)
             print('sliding')
+            active_threads=threading.enumerate()
+            print(len(active_threads))
+            #threading.enumerate() returns a list of all Thread objects currently alive,
+            #It excludes terminated threads and threads that have not yet been started.
             reset_value=100*current_time/total_length
             if resetting:
                 continue
@@ -472,15 +459,11 @@ def progress_slide():
                 stop_music()
                 time.sleep(1.0)
                 progress_bar.set(0)
-            elif play_mode_text=='单曲循环' or '列表循环' or '随机循环':
-                pass
                
 #定义function进度条线程
 def progress_thread():
-    t6=threading.Thread(target=progress_slide)
-    t6.start()
-    active_threads=threading.enumerate()
-    print(active_threads)
+    t5=threading.Thread(target=progress_slide)
+    t5.start()
     
 #定义function音乐播放模式
 def music_play_mode():
