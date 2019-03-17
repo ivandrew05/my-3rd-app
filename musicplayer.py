@@ -331,6 +331,7 @@ def stop_music():
     global pause
     global running
     global current_time
+    global sliding
     mixer.music.stop()
     playpausebutton.configure(image=playphoto)
     statusbar["text"]="已停止播放"
@@ -339,7 +340,7 @@ def stop_music():
     running=False
     sliding=False
     current_time=0
-    print('running=False')
+    print('sliding=False')
     
 #定义function循环播放列表
 def loop_playlist():
@@ -365,6 +366,7 @@ def loop_music():
 #定义function随机播放
 def random_play():
     global playing
+    global current_time
     time.sleep(0.125)
     selected_song=playlistbox.curselection()
     selected_song_index=int(selected_song[0])
@@ -374,6 +376,7 @@ def random_play():
     while random_song_index==selected_song_index:
         random_song_index=randrange(len(playlist))
     random_song=playlist[random_song_index]
+    current_time=0
     mixer.music.load(random_song)
     mixer.music.play()
     playlistbox.selection_clear(0, END) 
@@ -402,30 +405,6 @@ def shuffle_music():
         t3.start()
         active_threads=threading.enumerate()
         print(active_threads)
-        
-#定义function进度条滑块 
-def progress_slide():
-    global sliding
-    global total_length
-    global current_time
-    global resetting
-    resetting=False
-    while sliding:
-        if current_time<=total_length:
-            time.sleep(1.0)
-            print('sliding')
-            reset_value=100*current_time/total_length
-            if resetting:
-                continue
-            else:
-                progress_bar.set(reset_value)
-    
-#定义function进度条线程
-def progress_thread():
-    global sliding
-    if sliding:
-        t6=threading.Thread(target=progress_slide)
-        t6.start()
         
 #定义function重复播放
 def repeat_play():
@@ -493,7 +472,42 @@ def playing_music():
         t5.start()
         active_threads=threading.enumerate()
         print(active_threads)
-
+        
+#定义function进度条滑块 
+def progress_slide():
+    global sliding
+    global total_length
+    global current_time
+    global resetting
+    global play_mode_text
+    resetting=False
+    sliding=False
+    time.sleep(2.0)
+    sliding=True
+    while sliding:
+        if current_time<=total_length:
+            time.sleep(1.0)
+            print('sliding')
+            reset_value=100*current_time/total_length
+            if resetting:
+                continue
+            else:
+                progress_bar.set(reset_value)
+        else:
+            if play_mode_text=='单曲播放':
+                stop_music()
+                time.sleep(1.0)
+                progress_bar.set(0)
+            elif play_mode_text=='单曲循环' or '列表循环' or '随机循环':
+                pass
+               
+#定义function进度条线程
+def progress_thread():
+    t6=threading.Thread(target=progress_slide)
+    t6.start()
+    active_threads=threading.enumerate()
+    print(active_threads)
+    
 #定义function音乐播放模式
 def music_play_mode():
     global repeating
@@ -504,19 +518,18 @@ def music_play_mode():
     global play_mode_text
     global sliding
     play_mode_text=combobox.get()  #获取combobox选项里的value
-    if play_mode_text=='单曲播放' and running==False:
+    if play_mode_text=='单曲播放':
         repeating=False
         looping=False
         shuffling=False
-        sliding=False
-        running=True
-        playing_music()
+        #running=True
+        #playing_music()
+        progress_thread()
         play_mode_label.configure(image=repeatoffphoto)
-    elif play_mode_text=='单曲循环' and sliding==False:
+    elif play_mode_text=='单曲循环':
         looping=False
         shuffling=False
-        running=False
-        sliding=True
+        #running=False
         repeating=True 
         repeat_music()
         progress_thread()
@@ -524,7 +537,7 @@ def music_play_mode():
     elif play_mode_text=='列表循环':
         repeating=False
         shuffling=False
-        running=False
+        #running=False
         looping=True
         loop_music()
         progress_thread()
@@ -532,7 +545,7 @@ def music_play_mode():
     elif play_mode_text=='随机循环':
         repeating=False
         looping=False
-        running=False
+        #running=False
         shuffling=True
         shuffle_music()
         progress_thread()
