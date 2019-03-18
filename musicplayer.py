@@ -165,13 +165,13 @@ def start_count():
 
 #定义function播放进度
 def playing_progress(val):
+    global playing
+    global resetting
+    global reset_value
     global total_length
     global current_time
-    global selected_song_index
     global play_mode_text
-    global reset_value
-    global resetting
-    global playing
+    global selected_song_index
     selected_song=playlistbox.curselection()
     selected_song_index=int(selected_song[0])
     if playing:
@@ -196,8 +196,8 @@ def progress_resetting(val):
     
 #定义function时间重置
 def time_resetting(val):
-    global current_time
     global reset_value
+    global current_time
     reset_value=progress_bar.get()
     current_time=reset_value*total_length/100
     mins, secs=divmod(current_time, 60)
@@ -219,20 +219,20 @@ progress_bar.pack()
 playing=False
 pause=False
 mute=False
+sliding=False
 looping=False
 shuffling=False
 repeating=False
-sliding=False
 current_time=0
 
 #定义function播放暂停音乐
 def play_pause_music():
     global playing
-    global selected_song_index
-    global current_time
+    global pause
     global reset_value
+    global current_time
+    global selected_song_index
     if playing: #if playing=True
-        global pause
         if pause: #if pause=True
             mixer.music.unpause()
             playpausebutton.configure(image=pausephoto)
@@ -261,7 +261,24 @@ def play_pause_music():
             music_play_mode()
         except:
             messagebox.showerror(title="无音乐文件", message='''请从左侧选择您想听的音乐，再点击播放。''')
-
+    
+#定义function停止播放音乐
+def stop_music():
+    global playing
+    global pause
+    global sliding
+    global current_time
+    mixer.music.stop()
+    playpausebutton.configure(image=playphoto)
+    statusbar["text"]="已停止播放"
+    playing=False
+    pause=False
+    sliding=False
+    current_time=0
+    progress_bar.set(0)
+    currenttimelabel['text']="已播放 - 00:00"
+    print('sliding=False')
+    
 #定义function播放下一首
 def play_next():
     loop_play_next()
@@ -271,8 +288,8 @@ def play_next():
 def loop_play_next():
     global playing
     global pause
-    global selected_song_index
     global current_time
+    global selected_song_index
     mixer.music.stop()
     time.sleep(0.125)
     a=len(playlist)-1
@@ -300,8 +317,8 @@ def loop_play_next():
 def play_previous():
     global playing
     global pause
-    global selected_song_index
     global current_time
+    global selected_song_index
     mixer.music.stop()
     time.sleep(0.125)
     a=len(playlist)-1
@@ -326,25 +343,13 @@ def play_previous():
     pause=False
     music_play_mode()
     
-#定义function停止播放音乐
-def stop_music():
-    global playing
-    global pause
-    global current_time
-    global sliding
-    mixer.music.stop()
-    playpausebutton.configure(image=playphoto)
-    statusbar["text"]="已停止播放"
-    playing=False
-    pause=False
-    sliding=False
-    current_time=0
-    print('sliding=False')
-    
 #定义function循环播放列表
 def loop_playlist():
-    global looping
     global playing
+    global looping
+    looping=False
+    time.sleep(2.0)
+    looping=True
     while looping:
         if mixer.music.get_busy() or playing==False:
             time.sleep(1.0)
@@ -360,8 +365,8 @@ def loop_music():
 def random_play():
     global playing
     global current_time
-    global selected_song_index
     global random_song_index
+    global selected_song_index
     time.sleep(0.125)
     selected_song=playlistbox.curselection()
     selected_song_index=int(selected_song[0])
@@ -384,8 +389,11 @@ def random_play():
 
 #定义function随机播放列表
 def shuffle_playlist():
-    global shuffling
     global playing
+    global shuffling
+    shuffling=False
+    time.sleep(2.0)
+    shuffling=True
     while shuffling:
         if mixer.music.get_busy() or playing==False:
             time.sleep(1.0)
@@ -400,8 +408,8 @@ def shuffle_music():
 #定义function重复播放
 def repeat_play():
     global playing
-    global selected_song_index
     global current_time
+    global selected_song_index
     time.sleep(0.125)
     selected_song=playlist[selected_song_index]
     mixer.music.load(selected_song)
@@ -417,8 +425,11 @@ def repeat_play():
             
 #定义function重复播放单曲
 def repeat_single():
-    global repeating
     global playing
+    global repeating
+    repeating=False
+    time.sleep(2.0)
+    repeating=True
     while repeating:
         if mixer.music.get_busy() or playing==False:
             time.sleep(1.0)
@@ -433,14 +444,14 @@ def repeat_music():
 #定义function进度条滑块 
 def progress_slide():
     global sliding
+    global resetting
     global total_length
     global current_time
-    global resetting
     global play_mode_text
-    resetting=False
     sliding=False
     time.sleep(2.0)
     sliding=True
+    resetting=False
     while sliding:
         if current_time<=total_length:
             time.sleep(1.0)
@@ -470,46 +481,39 @@ def music_play_mode():
     global repeating
     global looping
     global shuffling
-    global selected_song_index
     global play_mode_text
-    global sliding
+    global selected_song_index
     play_mode_text=combobox.get()  #获取combobox选项里的value
     if play_mode_text=='单曲播放':
         repeating=False
         looping=False
         shuffling=False
-        progress_thread()
         play_mode_label.configure(image=repeatoffphoto)
     elif play_mode_text=='单曲循环':
         looping=False
         shuffling=False
-        repeating=True 
         repeat_music()
-        progress_thread()
         play_mode_label.configure(image=repeatonphoto)
     elif play_mode_text=='列表循环':
         repeating=False
         shuffling=False
-        looping=True
         loop_music()
-        progress_thread()
         play_mode_label.configure(image=looponphoto)
     elif play_mode_text=='随机循环':
         repeating=False
         looping=False
-        shuffling=True
         shuffle_music()
-        progress_thread()
         play_mode_label.configure(image=shuffleonphoto)
+    progress_thread()
     playlistbox.selection_clear(0, END)  
     playlistbox.selection_set(selected_song_index)
     playlistbox.see(selected_song_index)
                             
 #定义function双击播放
 def double_click(event):
-    global selected_song_index
     global playing
     global pause
+    global selected_song_index
     stop_music()
     time.sleep(0.125)
     selected_song=playlistbox.curselection()
@@ -541,7 +545,7 @@ def set_vol(val):
         volumebutton.configure(image=volmaxphoto)
         mute=False
         
-#定义消音  
+#定义function消音  
 def mute_music():
     global mute
     if mute:
