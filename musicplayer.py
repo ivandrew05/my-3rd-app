@@ -34,9 +34,9 @@ root.config(menu=menubar)
 
 #定义function浏览文件
 def browse_file():
-    global filename_path
-    filename_path=filedialog.askopenfilename()
-    add_to_playlist(filename_path)
+    global filename_path_tuple
+    filename_path_tuple=filedialog.askopenfilenames()  #得到一个tuple
+    add_to_playlist()
     
 #创建菜单和菜单下items
 submenu=Menu(menubar, tearoff=0)
@@ -83,12 +83,11 @@ bottomframe.pack(padx=10, pady=10)
 scrollbar=ttk.Scrollbar(ltopframe, orient=VERTICAL)
 scrollbar.pack(side=RIGHT, fill=Y)
 
-#创建playlistbox和playlist
-#change listbox width to 24 characters
-#给playlistbox添加scrollbar
+#创建playlistbox和playlist, change listbox width to 24 characters
+#选中playlistbox的item时，四周有点框，给playlistbox添加scrollbar
 playlistbox=Listbox(ltopframe, width=24, height=10, yscrollcommand=scrollbar.set)
 playlistbox.pack()
-playlistbox.config(activestyle=DOTBOX, font=('Microsoft YaHei',10))    #选中playlistbox的item时，四周有点框
+playlistbox.config(activestyle=DOTBOX, selectmode=EXTENDED, font=('Microsoft YaHei',10))
 scrollbar.config(command=playlistbox.yview)
 
 playlist=[]
@@ -97,27 +96,25 @@ playlist=[]
 #fullpath and filename are required to play the music inside playpause_music load function
 
 #定义function添加到播放列表
-def add_to_playlist(filename):
-    filename=os.path.basename(filename)
-    index=0
-    playlistbox.insert(index, filename)
-    playlist.insert(index, filename_path)
-    index=index+1
-    if playlist[0]=='':    #如果playlist中带有'', 移除它并删除playlistbox中对应的item
-        playlist.pop(0)
-        playlistbox.delete(0)
-    
+def add_to_playlist():
+    global filename_path_tuple
+    for i in filename_path_tuple:  #转化成不带path的filename，并逐个insert到playlist和playlistbox
+        filename=os.path.basename(i) 
+        index=0
+        playlist.insert(index, filename)
+        playlistbox.insert(index, filename)
+        index=index+1
+
 #定义从播放列表删除歌曲
 def delete_song():
-    selected_song=playlistbox.curselection()
-    selected_song=int(selected_song[0])
-    playlistbox.delete(selected_song)
-    playlist.pop(selected_song)
-    
+    selected_song_index_tuple=playlistbox.curselection()  #得到一个tuple
+    for i in selected_song_index_tuple[::-1]:  #从后往前逐个删除选择的index，避免index被改变
+        playlistbox.delete(i)
+        playlist.pop(i)
+
 #创建文件名标签，当前播放时间/总时长标签
 filelabel=ttk.Label(topframe, text="Let's Make Some Noise!")
 filelabel.pack(pady=10)
-
 current_total_timelabel=ttk.Label(topframe, text="--:-- / --:--")
 current_total_timelabel.pack()
 
@@ -222,6 +219,7 @@ looping=False
 shuffling=False
 repeating=False
 current_time=0
+total_timeformat='string'
 
 #定义function播放暂停音乐
 def play_pause_music():
@@ -484,9 +482,8 @@ def play_single_thread():
 #定义function进度条滑块 
 def progress_sliding():
     global sliding
-    global reset_value
-    global current_time
     global total_length
+    global current_time
     reset_value=current_time/total_length*100
     progress_bar.set(reset_value)
     sliding=root.after(1000, progress_sliding)  #main thread中每隔1000ms执行progress_sliding
@@ -537,6 +534,7 @@ def music_play_mode():
 def double_click(event):
     global playing
     global pause
+    global current_time
     global selected_song_index
     mixer.music.stop()
     time.sleep(0.125)
@@ -549,6 +547,7 @@ def double_click(event):
     playpausebutton.configure(image=pausephoto)
     playing=True
     pause=False
+    current_time=0
     music_play_mode()
     
 #定义function设置音量
