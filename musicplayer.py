@@ -108,7 +108,7 @@ def add_to_playlist():
 #定义从播放列表删除歌曲
 def delete_song():
     selected_song_index_tuple=playlistbox.curselection()  #得到一个tuple
-    for i in selected_song_index_tuple[::-1]:  #从后往前逐个删除选择的index，避免index被改变
+    for i in reversed (selected_song_index_tuple):  #从后往前逐个删除选择的index，避免index被改变
         playlistbox.delete(i)
         playlist.pop(i)
 
