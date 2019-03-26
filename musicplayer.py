@@ -89,19 +89,33 @@ playlistbox=Listbox(ltopframe, width=24, height=10, yscrollcommand=scrollbar.set
 playlistbox.pack()
 playlistbox.config(activestyle=DOTBOX, selectmode=EXTENDED, font=('Microsoft YaHei',10))
 scrollbar.config(command=playlistbox.yview)
-
+  
 playlist=[]
 #playlist contains the full path and the filename
 #playlistbox contains just the filename
 #fullpath and filename are required to play the music inside playpause_music load function
 
+#定义function载入播放列表
+def load_playlist():
+    user_data=open('userdata.txt', 'r')
+    for i in user_data:
+        i=i.rstrip('\n')   #去掉i后面带着的\n
+        filename=os.path.basename(i)
+        index=0
+        playlist.insert(index, i)
+        playlistbox.insert(index, filename)
+        index=index+1
+    user_data.close()
+    
+load_playlist()
+
 #定义function添加到播放列表
 def add_to_playlist():
     global filename_path_tuple
     for i in filename_path_tuple:  #转化成不带path的filename，并逐个insert到playlist和playlistbox
-        filename=os.path.basename(i) 
+        filename=os.path.basename(i)
         index=0
-        playlist.insert(index, filename)
+        playlist.insert(index, i)
         playlistbox.insert(index, filename)
         index=index+1
 
@@ -652,9 +666,17 @@ scale.bind('<Double-1>', default_volume)  #绑定双击音量条滑块时，执�
 #绑定双击playlistbox时，执行double_click
 playlistbox.bind('<Double-1>', double_click)
 
+#定义function保存播放列表
+def save_playlist():
+    user_data=open('userdata.txt', 'w')
+    for i in reversed (playlist):
+        user_data.write(i+'\n')    #\n用于分行
+    user_data.close()
+    
 #关闭时摧毁主窗口
 def on_closing():
     stop_music()
+    save_playlist()
     root.destroy()
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
