@@ -97,7 +97,7 @@ playlist=[]
 
 #定义function载入播放列表
 def load_playlist():
-    user_data=open('userdata.txt', 'r')
+    user_data=open('data/userdata.txt', 'r')
     for i in user_data:
         i=i.rstrip('\n')   #去掉i后面带着的\n
         filename=os.path.basename(i)
@@ -107,7 +107,15 @@ def load_playlist():
         index=index+1
     user_data.close()
     
+#定义function载入播放模式
+def load_play_mode():
+    global play_mode_text
+    play_mode_data=open('data/playmodedata.txt', 'r')
+    play_mode_text=play_mode_data.read()
+    play_mode_data.close()
+
 load_playlist()
+load_play_mode()
 
 #定义function添加到播放列表
 def add_to_playlist():
@@ -634,9 +642,11 @@ stopbutton.grid(row=0, column=3, padx=10)
 play_mode=StringVar()
 combobox= ttk.Combobox(bottomframe, textvariable=play_mode)
 combobox.grid(row=0, column=0)
-combobox['values'] = ('单曲播放', '单曲循环', '列表循环', '随机循环')
+play_mode_tuple= ('单曲播放', '单曲循环', '列表循环', '随机循环')
+combobox['values'] = play_mode_tuple
+play_mode_index=play_mode_tuple.index(play_mode_text)
 combobox.configure(state='readonly', width=8, font=('Microsoft YaHei',10))
-combobox.current(newindex=0)    #设置当前默认选项
+combobox.current(newindex=play_mode_index)    #设置当前默认选项
 combobox.bind('<<ComboboxSelected>>', lambda x: music_play_mode())  #切换选项时激活music_play_mode
 
 #创建播放模式Label
@@ -666,17 +676,25 @@ scale.bind('<Double-1>', default_volume)  #绑定双击音量条滑块时，执�
 #绑定双击playlistbox时，执行double_click
 playlistbox.bind('<Double-1>', double_click)
 
+#定义function保存播放模式
+def save_play_mode():
+    play_mode_data=open('data/playmodedata.txt', 'w')
+    play_mode_text=combobox.get()
+    play_mode_data.write(play_mode_text)
+    play_mode_data.close()
+    
 #定义function保存播放列表
 def save_playlist():
-    user_data=open('userdata.txt', 'w')
+    user_data=open('data/userdata.txt', 'w')
     for i in reversed (playlist):
         user_data.write(i+'\n')    #\n用于分行
     user_data.close()
     
-#关闭时摧毁主窗口
+#定义function关闭时摧毁主窗口
 def on_closing():
     stop_music()
     save_playlist()
+    save_play_mode()
     root.destroy()
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
