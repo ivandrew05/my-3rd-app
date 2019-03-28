@@ -179,7 +179,7 @@ def start_count():
             current_total_timelabel['text']=current_timeformat + " / " + total_timeformat
             time.sleep(0.125)
             current_time=current_time+0.125
-    current_time=current_time+1  #保证上方的while loop终止后，current_time一定大于total_length
+    #current_time=current_time+1  #保证上方的while loop终止后，current_time一定大于total_length
 
 #定义function播放进度
 def playing_progress(val):
