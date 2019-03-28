@@ -165,9 +165,10 @@ def show_details(play_song):
 #定义function计算当前播放时间
 def start_count():
     global pause
+    global total_length
     global current_time
     global total_timeformat
-    while current_time<=total_length and mixer.music.get_busy():
+    while current_time<=total_length:
         if pause:
             continue
         else:
@@ -291,6 +292,7 @@ def stop_music():
     global shuffling
     global current_time
     global total_timeformat
+    current_time=9999  #用于结束start_count线程
     mixer.music.stop()
     playpausebutton.configure(image=playphoto)
     statusbar["text"]="已停止播放"
@@ -317,8 +319,9 @@ def loop_play_next():
     global pause
     global current_time
     global selected_song_index
+    current_time=9999
     mixer.music.stop()
-    time.sleep(0.125)
+    time.sleep(0.2)
     a=len(playlist)-1
     current_time=0
     if selected_song_index<a:
@@ -346,8 +349,9 @@ def play_previous():
     global pause
     global current_time
     global selected_song_index
+    current_time=9999
     mixer.music.stop()
-    time.sleep(0.125)
+    time.sleep(0.2)
     a=len(playlist)-1
     current_time=0
     if selected_song_index==0:
@@ -558,8 +562,10 @@ def double_click(event):
     global pause
     global current_time
     global selected_song_index
+    current_time=9999
     mixer.music.stop()
-    time.sleep(0.125)
+    time.sleep(0.2)
+    current_time=0
     selected_song=playlistbox.curselection()
     selected_song_index=int(selected_song[0])
     mixer.music.load(playlist[selected_song_index])
@@ -569,7 +575,6 @@ def double_click(event):
     playpausebutton.configure(image=pausephoto)
     playing=True
     pause=False
-    current_time=0
     music_play_mode()
     
 #定义function设置音量
