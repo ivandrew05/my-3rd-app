@@ -97,15 +97,15 @@ playlist=[]
 
 #定义function载入播放列表
 def load_playlist():
-    user_data=open('data/userdata.txt', 'r')
-    for i in user_data:
+    playlist_data=open('data/playlistdata.txt', 'r')
+    for i in playlist_data:
         i=i.rstrip('\n')   #去掉i后面带着的\n
         filename=os.path.basename(i)
         index=0
         playlist.insert(index, i)
         playlistbox.insert(index, filename)
         index=index+1
-    user_data.close()
+    playlist_data.close()
     
 #定义function载入播放模式
 def load_play_mode():
@@ -161,14 +161,17 @@ def show_details(play_song):
     
     t1=threading.Thread(target=start_count)
     t1.start()
+    print('t1')
 
 #定义function计算当前播放时间
 def start_count():
     global pause
+    global counting
     global total_length
     global current_time
     global total_timeformat
-    while current_time<=total_length:
+    counting=True
+    while current_time<=total_length and counting:
         if pause:
             continue
         else:
@@ -179,7 +182,6 @@ def start_count():
             current_total_timelabel['text']=current_timeformat + " / " + total_timeformat
             time.sleep(0.125)
             current_time=current_time+0.125
-    #current_time=current_time+1  #保证上方的while loop终止后，current_time一定大于total_length
 
 #定义function播放进度
 def playing_progress(val):
@@ -239,6 +241,7 @@ mute=False
 sliding=False
 singling=False
 looping=False
+counting=False
 shuffling=False
 repeating=False
 current_time=0
@@ -290,9 +293,9 @@ def stop_music():
     global repeating
     global looping
     global shuffling
+    global counting
     global current_time
     global total_timeformat
-    current_time=9999  #用于结束start_count线程
     mixer.music.stop()
     playpausebutton.configure(image=playphoto)
     statusbar["text"]="已停止播放"
@@ -305,6 +308,7 @@ def stop_music():
     repeating=False
     looping=False
     shuffling=False
+    counting=False
     time.sleep(0.2)  #保证start_count()执行完后, current_time重置为0
     current_time=0
     
@@ -317,9 +321,10 @@ def play_next():
 def loop_play_next():
     global playing
     global pause
+    global counting
     global current_time
     global selected_song_index
-    current_time=9999
+    counting=False
     mixer.music.stop()
     time.sleep(0.2)
     a=len(playlist)-1
@@ -347,9 +352,10 @@ def loop_play_next():
 def play_previous():
     global playing
     global pause
+    global counting
     global current_time
     global selected_song_index
-    current_time=9999
+    counting=False
     mixer.music.stop()
     time.sleep(0.2)
     a=len(playlist)-1
@@ -394,6 +400,7 @@ def loop_playlist():
 def loop_music_thread():
     t2=threading.Thread(target=loop_playlist)
     t2.start()
+    print('t2')
    
 #定义function随机播放
 def random_play():
@@ -441,6 +448,7 @@ def shuffle_playlist():
 def shuffle_music_thread():
     t3=threading.Thread(target=shuffle_playlist)
     t3.start()
+    print('t3')
         
 #定义function重复播放
 def repeat_play():
@@ -480,11 +488,13 @@ def repeat_single():
 def repeat_music_thread():
     t4=threading.Thread(target=repeat_single)
     t4.start()
+    print('t4')
     
 #定义function播放模式开关
 def play_single():
     global sliding
     global singling
+    global counting
     global total_length
     global current_time
     global play_mode_text
@@ -504,6 +514,7 @@ def play_single():
 def play_single_thread():
     t5=threading.Thread(target=play_single)
     t5.start()
+    print('t5')
 
 #定义function进度条滑块 
 def progress_sliding():
@@ -560,9 +571,10 @@ def music_play_mode():
 def double_click(event):
     global playing
     global pause
+    global counting
     global current_time
     global selected_song_index
-    current_time=9999
+    counting=False
     mixer.music.stop()
     time.sleep(0.2)
     current_time=0
@@ -690,10 +702,10 @@ def save_play_mode():
     
 #定义function保存播放列表
 def save_playlist():
-    user_data=open('data/userdata.txt', 'w')
+    playlist_data=open('data/playlistdata.txt', 'w')
     for i in reversed (playlist):
-        user_data.write(i+'\n')    #\n用于分行
-    user_data.close()
+        playlist_data.write(i+'\n')    #\n用于分行
+    playlist_data.close()
     
 #定义function关闭时摧毁主窗口
 def on_closing():
