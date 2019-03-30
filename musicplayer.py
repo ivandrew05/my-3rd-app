@@ -177,11 +177,14 @@ def start_count():
             mins, secs=divmod(current_time, 60)
             mins=round(mins)
             secs=round(secs)
+            if secs==60:    #避免出现不合理的时间如：00:60，01:60, etc.
+                secs=0
+                mins=mins+1
             current_timeformat="{:02d}:{:02d}".format(mins, secs)
             current_total_timelabel['text']=current_timeformat + " / " + total_timeformat
             time.sleep(0.125)
             current_time=current_time+0.125
-
+            
 #定义function播放进度
 def playing_progress(val):
     global playing
