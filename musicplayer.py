@@ -161,7 +161,6 @@ def show_details(play_song):
     
     t1=threading.Thread(target=start_count)
     t1.start()
-    print('t1')
 
 #定义function计算当前播放时间
 def start_count():
@@ -383,16 +382,18 @@ def play_previous():
 #定义function循环播放列表
 def loop_playlist():
     global sliding
-    global playing
     global looping
+    global playing
+    global total_length
+    global current_time
     root.after_cancel(sliding)  #终止progress_sliding
     looping=False
-    time.sleep(1.0)
+    time.sleep(0.5)
     looping=True
     progress_sliding()  #启动progress_sliding
     while looping:
-        if mixer.music.get_busy() or playing==False:
-            time.sleep(0.5)
+        if current_time<=total_length or playing==False:
+            time.sleep(0.25)
         else:
             loop_play_next()
             
@@ -400,13 +401,11 @@ def loop_playlist():
 def loop_music_thread():
     t2=threading.Thread(target=loop_playlist)
     t2.start()
-    print('t2')
    
 #定义function随机播放
 def random_play():
     global playing
     global current_time
-    global random_song_index
     global selected_song_index
     time.sleep(0.125)
     selected_song=playlistbox.curselection()
@@ -433,14 +432,16 @@ def shuffle_playlist():
     global sliding
     global playing
     global shuffling
+    global total_length
+    global current_time
     root.after_cancel(sliding)  #终止progress_sliding
     shuffling=False
-    time.sleep(1.0)
+    time.sleep(0.5)
     shuffling=True
     progress_sliding()  #启动progress_sliding
     while shuffling:
-        if mixer.music.get_busy() or playing==False:
-            time.sleep(0.5)
+        if current_time<=total_length or playing==False:
+            time.sleep(0.25)
         else:
             random_play()
             
@@ -448,7 +449,6 @@ def shuffle_playlist():
 def shuffle_music_thread():
     t3=threading.Thread(target=shuffle_playlist)
     t3.start()
-    print('t3')
         
 #定义function重复播放
 def repeat_play():
@@ -473,14 +473,16 @@ def repeat_single():
     global sliding
     global playing
     global repeating
+    global total_length
+    global current_time
     root.after_cancel(sliding)  #终止progress_sliding
     repeating=False
-    time.sleep(1.0)
+    time.sleep(0.5)
     repeating=True
     progress_sliding()  #启动progress_sliding
     while repeating:
-        if mixer.music.get_busy() or playing==False:
-            time.sleep(0.5)
+        if current_time<=total_length or playing==False:
+            time.sleep(0.25)
         else:
             repeat_play()
 
@@ -488,24 +490,22 @@ def repeat_single():
 def repeat_music_thread():
     t4=threading.Thread(target=repeat_single)
     t4.start()
-    print('t4')
     
 #定义function播放模式开关
 def play_single():
     global sliding
     global singling
-    global counting
     global total_length
     global current_time
     global play_mode_text
     root.after_cancel(sliding)  #终止progress_sliding
     singling=False
-    time.sleep(1.0)
+    time.sleep(0.5)
     singling=True
     progress_sliding()  #启动progress_sliding
     while singling:
         if current_time<=total_length:
-            time.sleep(0.5)
+            time.sleep(0.25)
         else:
             if play_mode_text=='单曲播放':
                 stop_music()
@@ -514,7 +514,6 @@ def play_single():
 def play_single_thread():
     t5=threading.Thread(target=play_single)
     t5.start()
-    print('t5')
 
 #定义function进度条滑块 
 def progress_sliding():
@@ -523,7 +522,7 @@ def progress_sliding():
     global current_time
     reset_value=current_time/total_length*100
     progress_bar.set(reset_value)
-    sliding=root.after(1000, progress_sliding)  #main thread中每隔1000ms执行progress_sliding
+    sliding=root.after(500, progress_sliding)  #main thread中每隔500ms执行progress_sliding
     active_threads=threading.enumerate()
     print(len(active_threads))
     print('sliding')
