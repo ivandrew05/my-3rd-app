@@ -203,6 +203,7 @@ def playing_progress(val):
         mixer.music.load(playlist[selected_song_index])
         mixer.music.play(0, current_time)  #第一个argument表示播放次数，第二个表示开始播放的时间点
         resetting=False
+        show_details(playlist[selected_song_index])
         if reset_value==100 and play_mode_text=='单曲播放':
             stop_music()
     else:
@@ -212,7 +213,9 @@ def playing_progress(val):
 #定义function进度重置
 def progress_resetting(val):
     global resetting
+    global counting
     resetting=True
+    counting=False
     
 #定义function时间重置
 def time_resetting(val):
@@ -224,6 +227,9 @@ def time_resetting(val):
     mins, secs=divmod(current_time, 60)
     mins=round(mins)
     secs=round(secs)
+    if secs==60:
+        secs=0
+        mins=mins+1
     current_timeformat="{:02d}:{:02d}".format(mins, secs)
     current_total_timelabel['text']=current_timeformat + " / " + total_timeformat
         
@@ -400,7 +406,7 @@ def loop_playlist():
         else:
             loop_play_next()
             
-#定义function循环播放音乐
+#定义function循环播放线程
 def loop_music_thread():
     t2=threading.Thread(target=loop_playlist)
     t2.start()
@@ -448,7 +454,7 @@ def shuffle_playlist():
         else:
             random_play()
             
-#定义function随机播放音乐
+#定义function随机播放线程
 def shuffle_music_thread():
     t3=threading.Thread(target=shuffle_playlist)
     t3.start()
@@ -489,12 +495,12 @@ def repeat_single():
         else:
             repeat_play()
 
-#定义function重复播放音乐
+#定义function重复播放线程
 def repeat_music_thread():
     t4=threading.Thread(target=repeat_single)
     t4.start()
     
-#定义function播放模式开关
+#定义function播放单曲
 def play_single():
     global sliding
     global singling
@@ -513,7 +519,7 @@ def play_single():
             if play_mode_text=='单曲播放':
                 stop_music()
                                
-#定义function进度条线程
+#定义function播放单曲线程
 def play_single_thread():
     t5=threading.Thread(target=play_single)
     t5.start()
@@ -525,7 +531,7 @@ def progress_sliding():
     global current_time
     reset_value=current_time/total_length*100
     progress_bar.set(reset_value)
-    sliding=root.after(500, progress_sliding)  #main thread中每隔500ms执行progress_sliding
+    sliding=root.after(1000, progress_sliding)  #main thread中每隔1000ms执行progress_sliding
     active_threads=threading.enumerate()
     print(len(active_threads))
     print('sliding')
