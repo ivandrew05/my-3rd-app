@@ -188,6 +188,7 @@ def start_count():
 #定义function播放进度
 def playing_progress(val):
     global playing
+    global pause
     global resetting
     global reset_value
     global total_length
