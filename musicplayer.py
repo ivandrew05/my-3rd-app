@@ -190,16 +190,12 @@ def playing_progress(val):
     global playing
     global pause
     global resetting
-    global reset_value
-    global total_length
     global current_time
     global play_mode_text
     global selected_song_index
     selected_song=playlistbox.curselection()
     selected_song_index=int(selected_song[0])
-    if playing:
-        reset_value=progress_bar.get()
-        current_time=reset_value*total_length/100
+    if playing and pause==False:
         mixer.music.stop()
         mixer.music.load(playlist[selected_song_index])
         mixer.music.play(0, current_time)  #第一个argument表示播放次数，第二个表示开始播放的时间点
@@ -207,9 +203,6 @@ def playing_progress(val):
         show_details(playlist[selected_song_index])
         if reset_value==100 and play_mode_text=='单曲播放':
             stop_music()
-    else:
-        reset_value=progress_bar.get()
-        current_time=reset_value*total_length/100
                   
 #定义function进度重置
 def progress_resetting(val):
@@ -260,12 +253,18 @@ total_timeformat='string'
 def play_pause_music():
     global playing
     global pause
-    global reset_value
+    global counting
     global current_time
     global selected_song_index
     if playing: #if playing=True
         if pause: #if pause=True
-            mixer.music.unpause()
+            if counting:
+                mixer.music.unpause()
+            else:
+                play_it=playlist[selected_song_index]
+                mixer.music.load(play_it)
+                mixer.music.play(0, current_time)
+                show_details(play_it)
             playpausebutton.configure(image=pausephoto)
             statusbar["text"]="正在播放-"+os.path.basename(playlist[selected_song_index])
             pause=False
@@ -276,15 +275,11 @@ def play_pause_music():
             pause=True
     else:  #if playing=False
         try:
-            mixer.music.stop()
-            time.sleep(0.125)
             selected_song=playlistbox.curselection()
             selected_song_index=int(selected_song[0])
             play_it=playlist[selected_song_index]
             mixer.music.load(play_it)
             mixer.music.play(0, current_time)
-            reset_value=progress_bar.get()
-            progress_bar.set(reset_value)
             statusbar["text"]="正在播放-"+os.path.basename(play_it)
             show_details(play_it)
             playpausebutton.configure(image=pausephoto)
@@ -533,9 +528,9 @@ def progress_sliding():
     reset_value=current_time/total_length*100
     progress_bar.set(reset_value)
     sliding=root.after(1000, progress_sliding)  #main thread中每隔1000ms执行progress_sliding
-    active_threads=threading.enumerate()
-    print(len(active_threads))
-    print('sliding')
+    #active_threads=threading.enumerate()
+    #print(len(active_threads))
+    #print('sliding')
     #threading.enumerate() returns a list of all Thread objects currently alive,
     #It excludes terminated threads and threads that have not yet been started.
     
