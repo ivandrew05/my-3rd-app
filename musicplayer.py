@@ -193,8 +193,6 @@ def playing_progress(val):
     global current_time
     global play_mode_text
     global selected_song_index
-    selected_song=playlistbox.curselection()
-    selected_song_index=int(selected_song[0])
     if playing and pause==False:
         mixer.music.stop()
         mixer.music.load(playlist[selected_song_index])
@@ -249,6 +247,8 @@ repeating=False
 current_time=0
 total_timeformat='string'
 
+playlistbox.selection_set(0)  #设置playlistbox的默认选择
+
 #定义function播放暂停音乐
 def play_pause_music():
     global playing
@@ -256,28 +256,27 @@ def play_pause_music():
     global counting
     global current_time
     global selected_song_index
-    if playing: #if playing=True
-        if pause: #if pause=True
-            if counting:
-                mixer.music.unpause()
-            else:
-                play_it=playlist[selected_song_index]
-                mixer.music.load(play_it)
-                mixer.music.play(0, current_time)
-                show_details(play_it)
-            playpausebutton.configure(image=pausephoto)
-            statusbar["text"]="正在播放-"+os.path.basename(playlist[selected_song_index])
-            pause=False
-        else:  #if pause=False
-            mixer.music.pause()
-            playpausebutton.configure(image=playphoto)
-            statusbar["text"]="已暂停播放-"+os.path.basename(playlist[selected_song_index])
-            pause=True
-    else:  #if playing=False
-        try:
-            selected_song=playlistbox.curselection()
-            selected_song_index=int(selected_song[0])
-            play_it=playlist[selected_song_index]
+    try:
+        selected_song=playlistbox.curselection()
+        selected_song_index=int(selected_song[0])
+        play_it=playlist[selected_song_index]
+        if playing: #if playing=True
+            if pause: #if pause=True
+                if counting:
+                    mixer.music.unpause()
+                else:
+                    mixer.music.load(play_it)
+                    mixer.music.play(0, current_time)
+                    show_details(play_it)
+                playpausebutton.configure(image=pausephoto)
+                statusbar["text"]="正在播放-"+os.path.basename(play_it)
+                pause=False
+            else:  #if pause=False
+                mixer.music.pause()
+                playpausebutton.configure(image=playphoto)
+                statusbar["text"]="已暂停播放-"+os.path.basename(play_it)
+                pause=True
+        else:  #if playing=False
             mixer.music.load(play_it)
             mixer.music.play(0, current_time)
             statusbar["text"]="正在播放-"+os.path.basename(play_it)
@@ -285,7 +284,7 @@ def play_pause_music():
             playpausebutton.configure(image=pausephoto)
             playing=True
             music_play_mode()
-        except:
+    except:
             messagebox.showerror(title="无音乐文件", message='''请从左侧选择您想听的音乐，再点击播放。''')
     
 #定义function停止播放音乐
@@ -584,10 +583,11 @@ def double_click(event):
     current_time=0
     selected_song=playlistbox.curselection()
     selected_song_index=int(selected_song[0])
-    mixer.music.load(playlist[selected_song_index])
+    play_it=playlist[selected_song_index]
+    mixer.music.load(play_it)
     mixer.music.play()
-    statusbar["text"]="正在播放-"+os.path.basename(playlist[selected_song_index])
-    show_details(playlist[selected_song_index])
+    statusbar["text"]="正在播放-"+os.path.basename(play_it)
+    show_details(play_it)
     playpausebutton.configure(image=pausephoto)
     playing=True
     pause=False
