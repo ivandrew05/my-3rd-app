@@ -116,6 +116,7 @@ def load_play_mode():
 
 load_playlist()
 load_play_mode()
+playlistbox.selection_set(0)  #设置playlistbox的默认选择
 
 #定义function添加到播放列表
 def add_to_playlist():
@@ -246,8 +247,6 @@ shuffling=False
 repeating=False
 current_time=0
 total_timeformat='string'
-
-playlistbox.selection_set(0)  #设置playlistbox的默认选择
 
 #定义function播放暂停音乐
 def play_pause_music():
