@@ -98,9 +98,9 @@ playlist = []
 # playlist contains the full path and the filename
 # playlistbox contains just the filename
 # fullpath and filename are required to play the music inside playpause_music load function
+
+
 # 定义function载入播放列表
-
-
 def load_playlist():
     playlist_data = open('data/playlistdata.txt', 'r')
     for i in playlist_data:
@@ -112,7 +112,7 @@ def load_playlist():
         index = index + 1
     playlist_data.close()
 
-
+    
 # 定义function载入播放模式
 def load_play_mode():
     global play_mode_text
@@ -120,7 +120,7 @@ def load_play_mode():
     play_mode_text = play_mode_data.read()
     play_mode_data.close()
 
-
+    
 load_playlist()
 load_play_mode()
 playlistbox.selection_set(0)  # 设置playlistbox的默认选择
@@ -758,7 +758,7 @@ def on_closing():
     save_play_mode()
     root.destroy()
 
-
+    
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
 # 循环显示主窗口
